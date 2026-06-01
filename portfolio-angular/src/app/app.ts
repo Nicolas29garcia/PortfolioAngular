@@ -1,9 +1,10 @@
 import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+ import { MatListModule } from  '@angular/material/list' ;
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports : [ MatListModule ],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
