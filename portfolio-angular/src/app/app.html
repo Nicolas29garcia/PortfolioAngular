@@ -1,19 +1,90 @@
-<h1>{{ title() }}</h1>
+<mat-sidenav-container class="container">
 
-<p>Bem-vindo ao meu portfólio desenvolvido com Angular e Angular Material.</p>
+  <mat-sidenav #menu mode="side" class="menu">
 
-<mat-list role="list">
+    <h2>Menu</h2>
 
-  <mat-list-item role="listitem">
-    Meu nome é Nicolas Henrique e atualmente estudo no 3º ano de Informática no IFPR.
-  </mat-list-item>
+    <mat-nav-list>
 
-  <mat-list-item role="listitem">
-    Tenho interesse em tecnologia, programação e desenvolvimento de sistemas modernos.
-  </mat-list-item>
+      <a mat-list-item routerLink="/" (click)="menu.close()">
+        Home
+      </a>
 
-  <mat-list-item role="listitem">
-    Aqui vou apresentar meus projetos, atividades acadêmicas e minha evolução como desenvolvedor.
-  </mat-list-item>
+      <a mat-list-item routerLink="/sobre" (click)="menu.close()">
+        Sobre
+      </a>
 
-</mat-list>
+      <a mat-list-item routerLink="/projetos" (click)="menu.close()">
+        Projetos
+      </a>
+
+      <a mat-list-item routerLink="/contato" (click)="menu.close()">
+        Contato
+      </a>
+
+    </mat-nav-list>
+
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+
+    <mat-toolbar color="primary">
+
+      <button mat-icon-button (click)="menu.toggle()">
+
+        <mat-icon>menu</mat-icon>
+
+      </button>
+
+      <span class="titulo">Meu Portfólio</span>
+
+      <span class="espacador"></span>
+
+      <a
+        mat-button
+        routerLink="/"
+        routerLinkActive="ativo"
+        [routerLinkActiveOptions]="{ exact: true }">
+
+        Home
+
+      </a>
+
+      <a
+        mat-button
+        routerLink="/sobre"
+        routerLinkActive="ativo">
+
+        Sobre
+
+      </a>
+
+      <a
+        mat-button
+        routerLink="/projetos"
+        routerLinkActive="ativo">
+
+        Projetos
+
+      </a>
+
+      <a
+        mat-button
+        routerLink="/contato"
+        routerLinkActive="ativo">
+
+        Contato
+
+      </a>
+
+    </mat-toolbar>
+
+    <main class="conteudo">
+
+      <router-outlet></router-outlet>
+
+    </main>
+
+  </mat-sidenav-content>
+
+</mat-sidenav-container>

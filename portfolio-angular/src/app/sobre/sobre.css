@@ -1,0 +1,44 @@
+.card-sobre {
+  max-width: 850px;
+  margin: 30px auto;
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+mat-card-title {
+  font-size: 32px;
+  font-weight: bold;
+  color: #1976d2;
+}
+
+mat-card-subtitle {
+  font-size: 16px;
+  margin-top: 5px;
+}
+
+mat-card-content p {
+  font-size: 18px;
+  line-height: 1.7;
+  margin-top: 18px;
+}
+
+.skills {
+  margin-top: 25px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.skills span {
+  background: #1976d2;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 30px;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.skills span:hover {
+  transform: scale(1.08);
+}
