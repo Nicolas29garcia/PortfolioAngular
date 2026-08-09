@@ -1,3 +1,5 @@
+<h1>Meu Portfólio</h1>
+
 @if (carregando) {
   <p>Carregando projetos...</p>
 }
@@ -10,31 +12,38 @@
   <p>Nenhum projeto publicado ainda.</p>
 }
 
-@for (p of projetos; track p.id) {
-  <mat-card style="margin-bottom: 12px;">
+@if (!carregando && projetos.length > 0) {
+  @for (p of projetos; track p.id) {
 
-    <mat-card-header>
-      <mat-card-title>{{ p.nome }}</mat-card-title>
-      <mat-card-subtitle>
-        {{ p.tecnologias }} - {{ p.ano }}
-      </mat-card-subtitle>
-    </mat-card-header>
+    <mat-card>
 
-    <mat-card-content>
-      {{ p.descricao }}
-    </mat-card-content>
+      <mat-card-header>
+        <mat-card-title>
+          {{ p.nome }}
+        </mat-card-title>
 
-    <mat-card-actions>
+        <mat-card-subtitle>
+          {{ p.tecnologias }} - {{ p.ano }}
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        {{ p.descricao }}
+      </mat-card-content>
+
       @if (p.link_github) {
-        <a
-          mat-button
-          [href]="p.link_github"
-          target="_blank"
-          rel="noopener">
-          Ver no GitHub
-        </a>
+        <mat-card-actions>
+          <a
+            mat-button
+            [href]="p.link_github"
+            target="_blank"
+            rel="noopener">
+            Ver no GitHub
+          </a>
+        </mat-card-actions>
       }
-    </mat-card-actions>
 
-  </mat-card>
+    </mat-card>
+
+  }
 }

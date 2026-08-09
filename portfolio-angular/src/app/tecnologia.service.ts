@@ -14,7 +14,8 @@ export interface Tecnologia {
 export class TecnologiaService {
   private http = inject(HttpClient);
 
-  private url = 'https://refactored-capybara-wr64d4qp54xph54g5-8000.app.github.dev/api/tecnologias.php';
+  private url =
+    'https://refactored-capybara-wr64g4qp54xph54g5-8000.app.github.dev/api/tecnologias.php';
 
   listar(): Observable<Tecnologia[]> {
     return this.http.get<Tecnologia[]>(this.url);

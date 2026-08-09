@@ -9,13 +9,14 @@ import { TecnologiaService, Tecnologia } from '../tecnologia.service';
 })
 export class Catalogo implements OnInit {
   private service = inject(TecnologiaService);
+
   tecnologias: Tecnologia[] = [];
   carregando = true;
   erro = '';
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.service.listar().subscribe({
-      next: (lista) => {
+      next: (lista: Tecnologia[]) => {
         this.tecnologias = lista;
         this.carregando = false;
       },

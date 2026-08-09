@@ -9,18 +9,22 @@ import { ProjetoService, Projeto } from '../projeto.service';
   templateUrl: './projetos.html'
 })
 export class Projetos implements OnInit {
+
   private service = inject(ProjetoService);
+
   projetos: Projeto[] = [];
   carregando = true;
   erro = '';
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.service.listar().subscribe({
-      next: (lista) => {
+      next: (lista: Projeto[]) => {
+        console.log('PROJETOS RECEBIDOS:', lista);
         this.projetos = lista;
         this.carregando = false;
       },
-      error: () => {
+      error: (erro) => {
+        console.error('ERRO AO CARREGAR PROJETOS:', erro);
         this.erro = 'Falha ao carregar os projetos.';
         this.carregando = false;
       }
