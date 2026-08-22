@@ -1,87 +1,75 @@
 <mat-sidenav-container>
 
-<mat-sidenav #menu mode="side" class="menu">
+  <mat-sidenav #menu mode="over" class="menu">
 
-<h2>Menu</h2>
+    <h2>Menu</h2>
 
-<mat-nav-list>
+    <mat-nav-list>
 
-<a mat-list-item routerLink="/" (click)="menu.close()">
-Home
-</a>
+      <a mat-list-item routerLink="/" (click)="menu.close()">
+        Home
+      </a>
 
-<a mat-list-item routerLink="/sobre" (click)="menu.close()">
-Sobre
-</a>
+      <a mat-list-item routerLink="/sobre" (click)="menu.close()">
+        Sobre
+      </a>
 
-<a mat-list-item routerLink="/projetos" (click)="menu.close()">
-Projetos
-</a>
+      <a mat-list-item routerLink="/projetos" (click)="menu.close()">
+        Projetos
+      </a>
 
-<a mat-list-item routerLink="/catalogo" (click)="menu.close()">
-Catálogo
-</a>
+      <a mat-list-item routerLink="/catalogo" (click)="menu.close()">
+        Catálogo
+      </a>
 
-<a mat-list-item routerLink="/contato" (click)="menu.close()">
-Contato
-</a>
+      <a mat-list-item routerLink="/contato" (click)="menu.close()">
+        Contato
+      </a>
 
-</mat-nav-list>
+    </mat-nav-list>
 
-</mat-sidenav>
+  </mat-sidenav>
 
-<mat-toolbar color="primary">
+  <mat-toolbar color="primary">
 
-<button mat-icon-button (click)="menu.toggle()">
+    <button mat-icon-button (click)="menu.toggle()">
+      <mat-icon>menu</mat-icon>
+    </button>
 
-<mat-icon>menu</mat-icon>
+    <span class="titulo">Meu Portfólio</span>
 
-</button>
+    <span class="espacador"></span>
 
-<span class="titulo">Meu Portfólio</span>
+    <a
+      mat-button
+      routerLink="/"
+      routerLinkActive="ativo"
+      [routerLinkActiveOptions]="{ exact: true }">
+      Home
+    </a>
 
-<span class="espacador"></span>
+    <a mat-button routerLink="/sobre" routerLinkActive="ativo">
+      Sobre
+    </a>
 
-<a
-mat-button
-routerLink="/"
-routerLinkActive="ativo"
-[routerLinkActiveOptions]="{ exact: true }">
+    <a mat-button routerLink="/projetos" routerLinkActive="ativo">
+      Projetos
+    </a>
 
-Home
+    <a mat-button routerLink="/catalogo" routerLinkActive="ativo">
+      Catálogo
+    </a>
 
-</a>
+    <a mat-button routerLink="/contato" routerLinkActive="ativo">
+      Contato
+    </a>
 
-<a mat-button routerLink="/sobre" routerLinkActive="ativo">
+  </mat-toolbar>
 
-Sobre
+  <main class="conteudo">
 
-</a>
+    <router-outlet></router-outlet>
 
-<a mat-button routerLink="/projetos" routerLinkActive="ativo">
-
-Projetos
-
-</a>
-
-<a mat-button routerLink="/catalogo" routerLinkActive="ativo">
-
-Catálogo
-
-</a>
-
-<a mat-button routerLink="/contato" routerLinkActive="ativo">
-
-Contato
-
-</a>
-
-</mat-toolbar>
-
-<main class="conteudo">
-
-<router-outlet></router-outlet>
-
-</main>
+  </main>
 
 </mat-sidenav-container>

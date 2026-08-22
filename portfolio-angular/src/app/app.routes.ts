@@ -1,9 +1,13 @@
 import { Routes } from '@angular/router';
 
 import { Home } from './home/home';
+
 import { Sobre } from './sobre/sobre';
+
 import { Projetos } from './projetos/projetos';
-import { Contato } from './contato/contato';
+
+import { ContatoComponent } from './contato/contato';
+
 import { Catalogo } from './catalogo/catalogo';
 
 export const routes: Routes = [
@@ -16,6 +20,6 @@ export const routes: Routes = [
 
   { path: 'catalogo', component: Catalogo },
 
-  { path: 'contato', component: Contato }
+  { path: 'contato', component: ContatoComponent }
 
 ];

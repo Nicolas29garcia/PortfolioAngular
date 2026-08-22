@@ -1,77 +1,119 @@
-<mat-card class="contato-card">
+<div class="contato-container">
 
-  <mat-card-header>
+  <h1>Contato</h1>
 
-    <mat-card-title>Contato</mat-card-title>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
 
-    <mat-card-subtitle>
-      Entre em contato comigo
-    </mat-card-subtitle>
+    <!-- NOME -->
+    <div>
+      <label for="nome">Nome</label>
 
-  </mat-card-header>
+      <input
+        #nomeInput
+        id="nome"
+        type="text"
+        formControlName="nome"
+        placeholder="Seu nome"
+        [attr.aria-invalid]="form.get('nome')?.invalid && form.get('nome')?.touched"
+      />
 
-  <mat-card-content>
-
-    <form class="formulario">
-
-      <mat-form-field appearance="outline">
-
-        <mat-label>Nome</mat-label>
-
-        <input matInput placeholder="Digite seu nome">
-
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-
-        <mat-label>Email</mat-label>
-
-        <input matInput placeholder="Digite seu email">
-
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-
-        <mat-label>Mensagem</mat-label>
-
-        <textarea
-          matInput
-          rows="6"
-          placeholder="Digite sua mensagem">
-        </textarea>
-
-      </mat-form-field>
-
-      <button mat-raised-button color="primary">
-
-        Enviar Mensagem
-
-      </button>
-
-    </form>
-
-    <div class="info-contato">
-
-      <h3>Informações</h3>
-
-      <p>
-        Email:
-        20241ctb0100076@estudantes.ifpr.edu.br
+      <p
+        *ngIf="form.get('nome')?.invalid && form.get('nome')?.touched"
+        class="erro"
+      >
+        ⚠️ Informe um nome (mín. 3 letras).
       </p>
+    </div>
 
-      <p>
-        GitHub:
-        <a
-          href="https://github.com/Nicolas29garcia"
-          target="_blank">
 
-          Nicolas29garcia
+    <!-- E-MAIL -->
+    <div>
+      <label for="email">E-mail</label>
 
-        </a>
+      <input
+        id="email"
+        type="email"
+        formControlName="email"
+        placeholder="seu@email.com"
+        [attr.aria-invalid]="form.get('email')?.invalid && form.get('email')?.touched"
+      />
+
+      <p
+        *ngIf="form.get('email')?.invalid && form.get('email')?.touched"
+        class="erro"
+      >
+        ⚠️ E-mail inválido.
       </p>
+    </div>
+
+
+    <!-- MENSAGEM -->
+    <div>
+      <label for="mensagem">Mensagem</label>
+
+      <textarea
+        id="mensagem"
+        formControlName="mensagem"
+        placeholder="Digite sua mensagem"
+        rows="5"
+        [attr.aria-invalid]="form.get('mensagem')?.invalid && form.get('mensagem')?.touched"
+      ></textarea>
+
+      <p
+        *ngIf="form.get('mensagem')?.invalid && form.get('mensagem')?.touched"
+        class="erro"
+      >
+        ⚠️ Mensagem muito curta (mín. 10 caracteres).
+      </p>
+    </div>
+
+
+    <!-- ERROS VINDOS DO BACK-END -->
+    <div
+      *ngIf="errosBack.length > 0"
+      class="erro-back"
+      role="alert"
+    >
+
+      <strong>⚠️ Não foi possível enviar:</strong>
+
+      <ul>
+        <li *ngFor="let erro of errosBack">
+          {{ erro }}
+        </li>
+      </ul>
 
     </div>
 
-  </mat-card-content>
 
-</mat-card>
+    <!-- BOTÃO -->
+    <button
+      type="submit"
+      [disabled]="form.invalid || enviando"
+    >
+      {{ enviando ? 'Enviando...' : 'Enviar' }}
+    </button>
+
+
+    <!-- SUCESSO -->
+    <p
+      *ngIf="sucesso"
+      class="sucesso"
+      role="status"
+    >
+      ✅ {{ sucesso }}
+    </p>
+
+
+    <!-- ERRO DE REDE -->
+    <p
+      *ngIf="erro"
+      class="erro"
+      role="alert"
+    >
+      ❌ {{ erro }}
+    </p>
+
+  </form>
+
+</div>

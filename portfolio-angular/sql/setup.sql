@@ -19,6 +19,13 @@ CREATE TABLE tecnologias (
     descricao TEXT NOT NULL,
     ano_criacao INT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS contatos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nome VARCHAR(120) NOT NULL,
+  email VARCHAR(180) NOT NULL,
+  mensagem TEXT NOT NULL,
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 INSERT INTO projetos (nome, descricao, tecnologias, link_github, ano, status) VALUES
 ('Portfolio Pessoal','Site de portfolio responsivo com PHP, PDO e MariaDB, painel admin e login.','PHP, MariaDB, CSS, Git','https://github.com/usuario/portfolio',2026,'publicado'),
@@ -35,6 +42,8 @@ INSERT INTO tecnologias (nome, categoria, descricao, ano_criacao) VALUES
 ('PHP','Backend','Linguagem server-side para web dinamica.',1994),
 ('MariaDB','Banco de Dados','SGBD relacional open-source.',2009),
 ('Git','DevOps','Sistema de controle de versao distribuido.',2005);
+
+
 
 SELECT id, nome, ano, status FROM projetos;
 SELECT id, nome, categoria FROM tecnologias;

@@ -1,73 +1,68 @@
-Portfólio Angular
+# 💻 Portfólio Angular
 
-Projeto desenvolvido para a disciplina de Desenvolvimento Web II (DWII) do IFPR.
+Projeto desenvolvido para a disciplina de **Desenvolvimento Web II (DWII)** do **IFPR – Campus Ponta Grossa**.
 
-Sobre o Projeto
+## 📌 Sobre o Projeto
 
-Este projeto consiste em um portfólio pessoal desenvolvido com Angular e Angular Material.
+Portfólio pessoal desenvolvido com **Angular e Angular Material**, com integração a uma **API em PHP** e banco de dados **MariaDB**.
 
-O objetivo é apresentar meus projetos, habilidades, tecnologias utilizadas e minha evolução como desenvolvedor ao longo do curso.
+O projeto apresenta meus projetos, tecnologias utilizadas e uma página de contato capaz de enviar mensagens para o banco de dados.
 
-Além do front-end, o projeto possui uma API em PHP conectada ao MariaDB para fornecer dados em formato JSON.
+## 🛠️ Tecnologias
 
-Tecnologias Utilizadas
-Angular
-Angular Material
-TypeScript
-HTML
-CSS
-PHP
-MariaDB
-Git
-GitHub
-Ambiente Utilizado
-Node.js v24.14.0
-npm 11.9.0
-Angular CLI 21.2.13
-Funcionalidades
-Página Inicial
-Página Sobre
-Página Projetos
-Página Catálogo
-Página Contato
-Navegação por rotas
-Menu responsivo com Angular Material
-API REST em PHP
-Consumo de dados em JSON
-Consulta de projetos publicados
-Consulta de tecnologias
-Botão para acessar os projetos no GitHub
-Consulta de projeto por ID utilizando prepare()
-Tratamento de erros com HTTP 404 e HTTP 500
-CORS habilitado
-API
-Listar todos os projetos
-/api/projetos.php
-Buscar projeto por ID
-/api/projetos.php?id=1
-Listar tecnologias
-/api/tecnologias.php
-Como Executar a API
-Importe o arquivo sql/setup.sql no MariaDB.
-Configure as credenciais do banco em conexao.php.
-Execute o servidor PHP:
-/usr/bin/php -S 0.0.0.0:8000
-Acesse os endpoints pelo navegador.
-Estrutura do Projeto
-portfolio-angular/
-├── src/
-├── api/
-│   ├── projetos.php
-│   └── tecnologias.php
-├── sql/
-│   └── setup.sql
-├── conexao.php
-└── README.md
-Desenvolvedor
+- Angular
+- Angular Material
+- TypeScript
+- HTML
+- CSS
+- PHP
+- MariaDB
+- Git e GitHub
 
-Nicolas Henrique Garcia
+## ⚙️ Ambiente
 
-IFPR – Campus Ponta Grossa
+- Node.js v24.14.0
+- npm 11.9.0
+- Angular CLI 21.2.13
+- PHP 8.3.6
+- MariaDB
 
-GitHub:
-https://github.com/Nicolas29garcia
+## ✨ Funcionalidades
+
+- 🏠 Página Inicial
+- 👤 Página Sobre
+- 💼 Página Projetos
+- 📚 Página Catálogo
+- 📩 Página Contato
+- 🧭 Navegação com Angular Router
+- 📱 Menu responsivo com Angular Material
+- 🔌 API REST em PHP
+- 📦 Consumo de dados em JSON
+- 🔎 Consulta de projetos por ID
+- 🛠️ Consulta de tecnologias
+- 🔗 Links para projetos no GitHub
+- 🌐 CORS habilitado
+- ⚠️ Tratamento de erros HTTP
+
+### 📩 Formulário de Contato — Aula 18
+
+O formulário de contato foi integrado à API utilizando **POST**.
+
+- Reactive Forms com `FormGroup` e `Validators`
+- Validação de nome, e-mail e mensagem
+- Envio dos dados em JSON
+- `HttpClient` e `Observable`
+- Tratamento de sucesso e erro
+- Botão com estado **"Enviando..."**
+- Limpeza do formulário após o envio
+- Mensagens de erro para o usuário
+- Validação também no servidor
+- Dados armazenados na tabela `contatos` do MariaDB
+- API responde `201 Created` em caso de sucesso e `400 Bad Request` em caso de erro
+
+## 🔌 API
+
+### Projetos
+
+```text
+GET /api/projetos.php
