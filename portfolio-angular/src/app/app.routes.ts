@@ -1,25 +1,16 @@
 import { Routes } from '@angular/router';
-
 import { Home } from './home/home';
-
 import { Sobre } from './sobre/sobre';
-
 import { Projetos } from './projetos/projetos';
-
-import { ContatoComponent } from './contato/contato';
-
 import { Catalogo } from './catalogo/catalogo';
+import { ContatoComponent } from './contato/contato';
+import { Gestao } from './gestao/gestao';
 
 export const routes: Routes = [
-
   { path: '', component: Home },
-
   { path: 'sobre', component: Sobre },
-
   { path: 'projetos', component: Projetos },
-
   { path: 'catalogo', component: Catalogo },
-
-  { path: 'contato', component: ContatoComponent }
-
+  { path: 'contato', component: ContatoComponent },
+  { path: 'gestao', component: Gestao },
 ];

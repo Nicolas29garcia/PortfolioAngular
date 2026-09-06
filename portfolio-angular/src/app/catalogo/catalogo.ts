@@ -1,10 +1,11 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { TecnologiaService, Tecnologia } from '../tecnologia.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-catalogo',
-  imports: [MatCardModule],
+  imports: [MatCardModule,CommonModule],
   templateUrl: './catalogo.html'
 })
 export class Catalogo implements OnInit {

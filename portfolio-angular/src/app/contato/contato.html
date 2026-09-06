@@ -17,12 +17,11 @@
         [attr.aria-invalid]="form.get('nome')?.invalid && form.get('nome')?.touched"
       />
 
-      <p
-        *ngIf="form.get('nome')?.invalid && form.get('nome')?.touched"
-        class="erro"
-      >
-        ⚠️ Informe um nome (mín. 3 letras).
-      </p>
+      @if (form.get('nome')?.invalid && form.get('nome')?.touched) {
+        <p class="erro">
+          ⚠️ Informe um nome (mín. 3 letras).
+        </p>
+      }
     </div>
 
 
@@ -38,12 +37,11 @@
         [attr.aria-invalid]="form.get('email')?.invalid && form.get('email')?.touched"
       />
 
-      <p
-        *ngIf="form.get('email')?.invalid && form.get('email')?.touched"
-        class="erro"
-      >
-        ⚠️ E-mail inválido.
-      </p>
+      @if (form.get('email')?.invalid && form.get('email')?.touched) {
+        <p class="erro">
+          ⚠️ E-mail inválido.
+        </p>
+      }
     </div>
 
 
@@ -59,31 +57,25 @@
         [attr.aria-invalid]="form.get('mensagem')?.invalid && form.get('mensagem')?.touched"
       ></textarea>
 
-      <p
-        *ngIf="form.get('mensagem')?.invalid && form.get('mensagem')?.touched"
-        class="erro"
-      >
-        ⚠️ Mensagem muito curta (mín. 10 caracteres).
-      </p>
+      @if (form.get('mensagem')?.invalid && form.get('mensagem')?.touched) {
+        <p class="erro">
+          ⚠️ Mensagem muito curta (mín. 10 caracteres).
+        </p>
+      }
     </div>
 
 
     <!-- ERROS VINDOS DO BACK-END -->
-    <div
-      *ngIf="errosBack.length > 0"
-      class="erro-back"
-      role="alert"
-    >
-
-      <strong>⚠️ Não foi possível enviar:</strong>
-
-      <ul>
-        <li *ngFor="let erro of errosBack">
-          {{ erro }}
-        </li>
-      </ul>
-
-    </div>
+    @if (errosBack.length > 0) {
+      <div class="erro-back" role="alert">
+        <strong>⚠️ Não foi possível enviar:</strong>
+        <ul>
+          @for (erro of errosBack; track erro) {
+            <li>{{ erro }}</li>
+          }
+        </ul>
+      </div>
+    }
 
 
     <!-- BOTÃO -->
@@ -96,23 +88,19 @@
 
 
     <!-- SUCESSO -->
-    <p
-      *ngIf="sucesso"
-      class="sucesso"
-      role="status"
-    >
-      ✅ {{ sucesso }}
-    </p>
+    @if (sucesso) {
+      <p class="sucesso" role="status">
+        ✅ {{ sucesso }}
+      </p>
+    }
 
 
     <!-- ERRO DE REDE -->
-    <p
-      *ngIf="erro"
-      class="erro"
-      role="alert"
-    >
-      ❌ {{ erro }}
-    </p>
+    @if (erro) {
+      <p class="erro" role="alert">
+        ❌ {{ erro }}
+      </p>
+    }
 
   </form>
 
