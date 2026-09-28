@@ -14,7 +14,7 @@ export interface Projeto {
 @Injectable({ providedIn: 'root' })
 export class ProjetoService {
   private http = inject(HttpClient);
-  private url = 'https://refactored-capybara-wr64g4qp54xph54g5-8000.app.github.dev/api/projetos.php';
+  private url = 'https://refactored-capybara-wr64g4qp54xph54g5-3000.app.github.dev/api/projetos';
 
   listar(): Observable<Projeto[]> {
     return this.http.get<Projeto[]>(this.url);
