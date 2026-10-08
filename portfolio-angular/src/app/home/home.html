@@ -1,22 +1,46 @@
-<mat-card>
+<mat-card class="hero-card">
+
+  <div class="hero-glow"></div>
 
   <mat-card-header>
 
-    <mat-card-title>
-      Olá, eu sou Nicolas 👋
-    </mat-card-title>
+    <div class="hero-texto">
 
-    <mat-card-subtitle>
-      Técnico em Informática — IFPR CPG
-    </mat-card-subtitle>
+      <span class="badge">
+        Portfólio • 2026
+      </span>
+
+      <mat-card-title>
+        Olá, eu sou <span>Nicolas</span> 👋
+      </mat-card-title>
+
+      <mat-card-subtitle>
+        Técnico em Informática — IFPR CPG
+      </mat-card-subtitle>
+
+    </div>
 
   </mat-card-header>
 
   <mat-card-content>
 
     <p>
-      Bem-vindo ao meu portfólio, agora construído com Angular.
+      Transformo ideias em experiências digitais modernas,
+      explorando desenvolvimento web, tecnologia e inovação.
     </p>
+
+    <div class="acoes">
+
+      <a mat-flat-button routerLink="/projetos">
+        Ver projetos
+        <mat-icon>arrow_forward</mat-icon>
+      </a>
+
+      <a mat-button routerLink="/sobre">
+        Sobre mim
+      </a>
+
+    </div>
 
   </mat-card-content>
 

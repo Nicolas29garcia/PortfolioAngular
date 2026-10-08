@@ -1,39 +1,444 @@
-.espacador { flex: 1 1 auto; }
+/* ================================
+   GLOBAL / LAYOUT
+================================ */
+
+:host {
+  display: block;
+  min-height: 100vh;
+
+  --bg: #050505;
+  --bg-soft: #0a0a0a;
+  --surface: rgba(18, 18, 18, 0.72);
+  --surface-hover: rgba(255, 255, 255, 0.07);
+
+  --text: #f5f5f7;
+  --text-muted: #9a9a9f;
+
+  --border: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.16);
+
+  --accent: #ffffff;
+
+  background:
+    radial-gradient(
+      circle at 50% -20%,
+      rgba(255, 255, 255, 0.08),
+      transparent 35%
+    ),
+    #050505;
+
+  color: var(--text);
+}
+
+* {
+  box-sizing: border-box;
+}
+
 .container {
-  height: 100vh;
+  min-height: 100vh;
+  background: transparent;
 }
 
-.menu {
-  width: 220px;
-  padding: 20px;
-  background: #f5f5f5;
-}
 
-.titulo {
-  font-size: 22px;
-  font-weight: bold;
-  margin-left: 10px;
-}
-
-.espacador {
-  flex: 1 1 auto;
-}
-
-.conteudo {
-  padding: 24px;
-}
-
-a {
-  text-decoration: none;
-}
-
-.ativo {
-  font-weight: bold;
-  border-bottom: 2px solid white;
-}
+/* ================================
+   TOOLBAR
+================================ */
 
 mat-toolbar {
   position: sticky;
   top: 0;
   z-index: 1000;
+
+  height: 72px;
+
+  padding: 0 36px;
+
+  background: rgba(5, 5, 5, 0.72) !important;
+
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+
+  border-bottom: 1px solid var(--border);
+
+  color: var(--text) !important;
+
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.02),
+    0 10px 40px rgba(0, 0, 0, 0.25);
+
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease;
+}
+
+
+/* ================================
+   LOGO / TÍTULO
+================================ */
+
+.titulo {
+  position: relative;
+
+  margin-left: 14px;
+
+  font-size: 19px;
+  font-weight: 650;
+
+  letter-spacing: -0.5px;
+
+  color: #ffffff;
+
+  user-select: none;
+}
+
+.titulo::after {
+  content: "";
+
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+
+  width: 18px;
+  height: 2px;
+
+  background: #ffffff;
+  border-radius: 10px;
+
+  opacity: 0.75;
+}
+
+
+/* ================================
+   ESPAÇADOR
+================================ */
+
+.espacador {
+  flex: 1 1 auto;
+}
+
+
+/* ================================
+   BOTÃO MENU
+================================ */
+
+mat-toolbar button[mat-icon-button] {
+  width: 44px;
+  height: 44px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid transparent;
+  border-radius: 50%;
+
+  color: #ffffff;
+
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease,
+    transform 0.25s ease;
+}
+
+mat-toolbar button[mat-icon-button]:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--border);
+
+  transform: scale(1.04);
+}
+
+mat-toolbar button[mat-icon-button]:active {
+  transform: scale(0.94);
+}
+
+
+/* ================================
+   LINKS DO HEADER
+================================ */
+
+mat-toolbar a[mat-button] {
+  position: relative;
+
+  margin-left: 4px;
+  padding: 0 16px;
+
+  min-width: unset;
+
+  border-radius: 999px;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  letter-spacing: -0.15px;
+
+  color: var(--text-muted) !important;
+
+  text-decoration: none;
+
+  transition:
+    color 0.25s ease,
+    background 0.25s ease,
+    transform 0.2s ease;
+}
+
+mat-toolbar a[mat-button]:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.07);
+
+  transform: translateY(-1px);
+}
+
+
+/* remove o estilo antigo de border-bottom */
+mat-toolbar .ativo {
+  color: #ffffff !important;
+  font-weight: 600;
+
+  border-bottom: none;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+
+/* pequeno indicador elegante */
+mat-toolbar .ativo::after {
+  content: "";
+
+  position: absolute;
+
+  left: 50%;
+  bottom: 3px;
+
+  width: 4px;
+  height: 4px;
+
+  transform: translateX(-50%);
+
+  border-radius: 50%;
+
+  background: #ffffff;
+
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+}
+
+
+/* ================================
+   SIDENAV
+================================ */
+
+.menu {
+  width: 290px;
+
+  padding: 32px 20px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(20, 20, 20, 0.98),
+      rgba(7, 7, 7, 0.99)
+    ) !important;
+
+  color: #ffffff;
+
+  border-right: 1px solid var(--border);
+
+  box-shadow:
+    20px 0 60px rgba(0, 0, 0, 0.45);
+}
+
+
+/* ================================
+   TÍTULO DO MENU
+================================ */
+
+.menu h2 {
+  margin: 6px 14px 30px;
+
+  font-size: 24px;
+  font-weight: 650;
+
+  letter-spacing: -0.8px;
+
+  color: #ffffff;
+}
+
+
+/* ================================
+   LINKS DO SIDEBAR
+================================ */
+
+.menu a[mat-list-item] {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+
+  margin-bottom: 6px;
+
+  border-radius: 12px;
+
+  color: #a8a8ad;
+
+  overflow: hidden;
+
+  transition:
+    background 0.25s ease,
+    color 0.25s ease,
+    transform 0.25s ease;
+}
+
+.menu a[mat-list-item]:hover {
+  background: rgba(255, 255, 255, 0.07);
+
+  color: #ffffff;
+
+  transform: translateX(4px);
+}
+
+.menu a[mat-list-item]::before {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+
+  width: 3px;
+  height: 0;
+
+  border-radius: 999px;
+
+  background: #ffffff;
+
+  transition: height 0.25s ease;
+}
+
+.menu a[mat-list-item]:hover::before {
+  height: 22px;
+}
+
+
+/* ================================
+   CONTEÚDO
+================================ */
+
+.conteudo {
+  position: relative;
+
+  min-height: calc(100vh - 72px);
+
+  padding: 48px clamp(24px, 5vw, 90px);
+
+  background:
+    radial-gradient(
+      circle at 10% 10%,
+      rgba(255, 255, 255, 0.035),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 90% 30%,
+      rgba(255, 255, 255, 0.025),
+      transparent 35%
+    );
+
+  animation: pageEnter 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+
+/* ================================
+   LINKS
+================================ */
+
+a {
+  text-decoration: none;
+}
+
+
+/* ================================
+   ANIMAÇÕES
+================================ */
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* ================================
+   SCROLLBAR PREMIUM
+================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #050505;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #292929;
+  border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3d3d3d;
+}
+
+
+/* ================================
+   SELEÇÃO DE TEXTO
+================================ */
+
+::selection {
+  background: #ffffff;
+  color: #000000;
+}
+
+
+/* ================================
+   RESPONSIVIDADE
+================================ */
+
+@media (max-width: 900px) {
+
+  mat-toolbar {
+    padding: 0 18px;
+  }
+
+  mat-toolbar a[mat-button] {
+    display: none;
+  }
+
+  .conteudo {
+    padding: 34px 20px;
+  }
+
+  .titulo {
+    font-size: 18px;
+  }
+}
+
+
+@media (max-width: 480px) {
+
+  mat-toolbar {
+    height: 64px;
+  }
+
+  .conteudo {
+    min-height: calc(100vh - 64px);
+
+    padding: 28px 16px;
+  }
+
+  .menu {
+    width: 85vw;
+    max-width: 300px;
+  }
 }

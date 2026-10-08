@@ -32,6 +32,17 @@ app.get('/api/projetos/:id', async (req, res) => {
     }
 });
 
+// O mesmo SELECT do api/projetos.php: so os publicados, do mais novo ao mais antigo.
+app.get('/api/projetos', async (req, res) => {
+  try {
+    const sql = "SELECT id, nome, descricao, tecnologias, link_github, ano FROM projetos WHERE status = 'publicado' ORDER BY ano DESC, id";
+    const [projetos] = await pool.query(sql);
+    res.json(projetos);
+  } catch (erro) {
+    res.status(500).json({ erro: 'Falha no servidor: ' + erro.message });
+  }
+});
+
 // 3.1: Rota do catálogo de tecnologias
 app.get('/api/tecnologias', async (req, res) => {
     try {
@@ -50,3 +61,4 @@ app.get('/api/tecnologias', async (req, res) => {
 app.listen(PORTA, () => {
     console.log(`API no ar em http://localhost:${PORTA}`);
 });
+
