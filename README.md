@@ -20,6 +20,8 @@ O projeto apresenta meus projetos, as tecnologias utilizadas, uma página de con
 - Express
 - MariaDB
 - mysql2
+- bcryptjs
+- jsonwebtoken
 - CORS
 - Git e GitHub
 
@@ -54,6 +56,9 @@ O projeto apresenta meus projetos, as tecnologias utilizadas, uma página de con
 - 🌐 CORS habilitado
 - ⚠️ Tratamento de erros HTTP
 - 🗄️ Persistência dos dados no MariaDB
+- 🔐 Autenticação com senha armazenada em hash
+- 🎟️ Login com token JWT
+- 🛡️ Middleware de autenticação para rotas protegidas
 
 ## 📩 Formulário de Contato — Aula 18
 
@@ -93,36 +98,72 @@ GET /api/tecnologias.php
 
 A API em PHP utiliza o MariaDB para consultar e armazenar os dados do portfólio.
 
-## 🚀 API em Node.js — Aula 21, Aula 22 e Aula 23
+## 🚀 API em Node.js — Aulas 21 a 24
 
 A API em Node.js foi desenvolvida com Express e integrada ao banco de dados MariaDB `dwii_db`.
 
-Na Aula 21, foi criada a estrutura inicial da API. Na Aula 22, a consulta dos projetos foi integrada ao banco de dados. Na Aula 23, foram implementadas e testadas as operações de cadastro, atualização e exclusão de projetos.
+Na Aula 21, foi criada a estrutura inicial da API. Na Aula 22, a consulta dos projetos foi integrada ao banco de dados. Na Aula 23, foram implementadas as operações de cadastro, atualização e exclusão. Na Aula 24, foi adicionada a autenticação por e-mail e senha, a geração de tokens JWT e a proteção das rotas de escrita.
 
-### 📂 Localização
+### 📂 Estrutura dos arquivos
 
 ```text
 api-node/
 ├── server.js
+├── db.js
+├── criar-usuario.js
 ├── package.json
-└── package-lock.json
+├── package-lock.json
+└── .gitignore
+
+portfolio-angular/sql/
+├── setup.sql
+└── usuarios.sql
 ```
 
-### ⚙️ Como executar a API
+### ⚙️ Como executar a API do zero
 
-Inicie o MariaDB:
+**1. Iniciar o MariaDB**
 
 ```bash
 sudo service mariadb start
 ```
 
-Entre na pasta da API:
+**2. Criar e preparar o banco de dados**
+
+Na raiz do repositório:
+
+```bash
+sudo mariadb < portfolio-angular/sql/setup.sql
+```
+
+**3. Criar a tabela de usuários**
+
+```bash
+sudo mariadb dwii_db < portfolio-angular/sql/usuarios.sql
+```
+
+O arquivo `usuarios.sql` cria a tabela `usuarios`, que armazena o e-mail e o hash da senha.
+
+**4. Instalar as dependências da API**
 
 ```bash
 cd /workspaces/PortfolioAngular/api-node
+npm install
 ```
 
-Inicie o servidor:
+**5. Criar o usuário administrador**
+
+Execute o comando com o e-mail e a senha escolhidos para o dono do portfólio:
+
+```bash
+node criar-usuario.js dono@portfolio.dev <senha>
+```
+
+Substitua `<senha>` pela senha escolhida no terminal. O script utiliza `bcryptjs` para gerar o hash antes de salvar a senha no banco.
+
+**Importante:** não publique a senha real, o hash da senha ou tokens JWT no repositório.
+
+**6. Iniciar o servidor**
 
 ```bash
 node server.js
@@ -134,121 +175,95 @@ A API utiliza o endereço base:
 http://localhost:3000
 ```
 
-**Importante:** mantenha o terminal do servidor aberto enquanto executa os testes em outro terminal.
+Mantenha o terminal do servidor aberto enquanto executa os testes em outro terminal.
 
-### 📋 Operações disponíveis
+### 🔐 Login e autenticação — Aula 24
 
-| Método | Rota | Descrição | Resposta de sucesso |
-|---|---|---|---|
-| GET | `/api/projetos` | Lista projetos publicados | `200 OK` |
-| GET | `/api/projetos/:id` | Consulta projeto por ID | `200 OK` |
-| POST | `/api/projetos` | Cadastra um projeto | `201 Created` |
-| PUT | `/api/projetos/:id` | Atualiza um projeto | `200 OK` |
-| DELETE | `/api/projetos/:id` | Exclui um projeto | `204 No Content` |
+A rota `POST /api/login` recebe o e-mail e a senha, verifica o usuário no banco e compara a senha informada com o hash armazenado.
 
-### 1. GET — Listar projetos publicados
+Em caso de sucesso, a API retorna um token JWT. Nas rotas protegidas, o token deve ser enviado no cabeçalho `Authorization` usando o formato `Bearer`.
 
-Comando:
+O middleware `autenticar` verifica o token antes de permitir a execução da rota.
+
+#### 1. Login válido
 
 ```bash
-curl -i http://localhost:3000/api/projetos
+curl -i -X POST http://localhost:3000/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"dono@portfolio.dev","senha":"<senha>"}'
 ```
 
-Resposta esperada quando a consulta é realizada:
+Resposta esperada: `200 OK`, com um corpo JSON contendo `token`.
 
-```http
-HTTP/1.1 200 OK
-```
+Substitua `<senha>` pela senha real do administrador somente no terminal. Não coloque a senha real no README.
 
-O corpo da resposta contém os projetos publicados em formato JSON.
-
-### 2. GET — Consultar projeto por ID
-
-Comando:
+#### 2. Login inválido
 
 ```bash
-curl -i http://localhost:3000/api/projetos/5
+curl -i -X POST http://localhost:3000/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"dono@portfolio.dev","senha":"senha_incorreta"}'
 ```
 
-Resposta esperada quando o projeto existe e está publicado:
+Resposta esperada: `401 Unauthorized`.
 
-```http
-HTTP/1.1 200 OK
+Corpo esperado:
+
+```json
+{
+  "erro": "Email ou senha invalidos"
+}
 ```
 
-O corpo da resposta contém os dados do projeto em JSON.
+A API utiliza a mesma mensagem para e-mail inexistente e senha incorreta, evitando revelar se determinado e-mail está cadastrado.
 
-Se o projeto não existir ou não estiver publicado, a API poderá responder `404 Not Found`.
+#### 3. Configurar o token no terminal
 
-### 3. POST — Cadastrar projeto
+Depois de fazer login, copie o token retornado e configure a variável no terminal:
 
-Comando:
+```bash
+TOKEN='<token_recebido_no_login>'
+```
+
+O valor acima é um exemplo. Utilize o token real retornado pela API.
+
+#### 4. POST sem token
 
 ```bash
 curl -i -X POST http://localhost:3000/api/projetos \
   -H "Content-Type: application/json" \
-  -d '{"nome":"Projeto de teste 2","ano":2026}'
+  -d '{"nome":"Projeto de teste","ano":2026}'
 ```
 
-Resposta de sucesso:
-
-```http
-HTTP/1.1 201 Created
-```
-
-Exemplo de corpo:
+Resposta esperada: `401 Unauthorized`.
 
 ```json
 {
-  "id": 14
+  "erro": "Token ausente"
 }
 ```
 
-O ID retornado é gerado pelo banco de dados. O número acima é apenas ilustrativo: os IDs `13` e `14` utilizados nos testes anteriores foram excluídos.
-
-#### Validação do nome
-
-Comando:
+#### 5. POST com token
 
 ```bash
 curl -i -X POST http://localhost:3000/api/projetos \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"ano":2026}'
+  -d '{"nome":"Projeto de teste","ano":2026}'
 ```
 
-Resposta:
+Resposta esperada: `201 Created`, com o ID gerado pelo banco de dados.
 
-```http
-HTTP/1.1 400 Bad Request
-```
-
-Corpo:
-
-```json
-{
-  "erro": "Informe pelo menos o nome do projeto"
-}
-```
-
-Essa validação impede que a API cadastre um projeto sem nome.
-
-### 4. PUT — Atualizar projeto
-
-Comando de exemplo:
+#### 6. PUT com token
 
 ```bash
-curl -i -X PUT http://localhost:3000/api/projetos/5 \
+curl -i -X PUT http://localhost:3000/api/projetos/20 \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"nome":"API de Clima Atualizada","ano":2026}'
+  -d '{"nome":"Projeto com tranca (editado)","ano":2026}'
 ```
 
-Resposta quando a atualização é realizada:
-
-```http
-HTTP/1.1 200 OK
-```
-
-Corpo:
+Resposta esperada, caso o projeto exista: `200 OK`.
 
 ```json
 {
@@ -256,65 +271,80 @@ Corpo:
 }
 ```
 
-**Teste com ID inexistente**
+O ID `20` é um exemplo baseado nos testes realizados no banco. Confira se o projeto ainda existe antes de executar o comando.
 
-Comando executado:
-
-```bash
-curl -i -X PUT http://localhost:3000/api/projetos/999 \
-  -H "Content-Type: application/json" \
-  -d '{"nome":"Projeto de teste","ano":2026}'
-```
-
-Resposta recebida:
-
-```http
-HTTP/1.1 404 Not Found
-```
-
-Corpo:
-
-```json
-{
-  "erro": "Projeto nao encontrado"
-}
-```
-
-Esse teste confirma que a API retorna `404 Not Found` quando o projeto informado não existe.
-
-### 5. DELETE — Excluir projeto
-
-Comando de exemplo:
+#### 7. DELETE sem token
 
 ```bash
-curl -i -X DELETE http://localhost:3000/api/projetos/14
+curl -i -X DELETE http://localhost:3000/api/projetos/20
 ```
 
-Resposta na primeira exclusão de um projeto existente:
+Resposta esperada: `401 Unauthorized`, pois a autenticação é verificada antes de a exclusão ser executada.
 
-```http
-HTTP/1.1 204 No Content
+#### 8. GET público sem token
+
+```bash
+curl -i http://localhost:3000/api/projetos
 ```
 
-A resposta não possui corpo.
+Resposta esperada: `200 OK`, com a lista de projetos publicados. A consulta pública não exige token.
 
-Ao executar novamente o comando com o mesmo ID, a API deve responder:
+### 📋 Operações da API
 
-```http
-HTTP/1.1 404 Not Found
-```
+| Método | Rota | Autenticação | Resposta de sucesso |
+|---|---|---|---|
+| GET | `/api/projetos` | Pública | `200 OK` |
+| GET | `/api/projetos/:id` | Pública | `200 OK` |
+| GET | `/api/projetos/todos` | Token obrigatório | `200 OK` |
+| POST | `/api/projetos` | Token obrigatório | `201 Created` |
+| PUT | `/api/projetos/:id` | Token obrigatório | `200 OK` |
+| DELETE | `/api/projetos/:id` | Token obrigatório | `204 No Content` |
+| POST | `/api/login` | Pública | `200 OK` |
+| GET | `/api/tecnologias` | Pública | `200 OK` |
+| POST | `/api/tecnologias` | Token obrigatório | `201 Created` |
+| PUT | `/api/tecnologias/:id` | Token obrigatório | `200 OK` |
+| DELETE | `/api/tecnologias/:id` | Token obrigatório | `204 No Content` |
 
-Corpo:
+As rotas protegidas retornam `401 Unauthorized` quando o token está ausente, inválido ou expirado. As rotas de consulta pública permanecem acessíveis sem autenticação.
 
-```json
-{
-  "erro": "Projeto nao encontrado"
-}
-```
+### 🔎 Projetos publicados e rascunhos
 
-**Observação:** utilize um ID de teste existente para a primeira exclusão. Os IDs `13` e `14` usados anteriormente já foram excluídos durante os testes da Aula 23.
+A rota pública `GET /api/projetos` retorna somente projetos com status `publicado`.
 
-### 🌐 Teste de CORS — Pré-voo OPTIONS
+A rota protegida `GET /api/projetos/todos` permite consultar todos os projetos, inclusive os que estão em rascunho, mediante token JWT válido.
+
+### ⏱️ Validade do token
+
+O token JWT tem validade de **30 minutos**. Esse prazo reduz o período durante o qual um token comprometido poderia ser utilizado.
+
+### 🔑 Sobre o segredo JWT
+
+Nesta etapa, o segredo utilizado para assinar e verificar os tokens está definido em `server.js`. Essa abordagem é adequada apenas para o exercício e não é recomendada para produção, pois o segredo pode ser exposto no código-fonte.
+
+Na Aula 29, o segredo será transferido para uma variável de ambiente, utilizando um arquivo `.env` que não deve ser enviado ao GitHub.
+
+### ⚠️ O que esta API ainda não faz
+
+- Não possui um sistema de recuperação ou redefinição de senha.
+- Não possui renovação automática de tokens; após a expiração, é necessário realizar o login novamente.
+
+## 📦 Tratamento de erros HTTP
+
+A API utiliza códigos de status HTTP para informar o resultado das operações:
+
+| Código | Significado |
+|---|---|
+| `200 OK` | Operação realizada com sucesso |
+| `201 Created` | Recurso cadastrado |
+| `204 No Content` | Recurso excluído com sucesso, sem corpo na resposta |
+| `400 Bad Request` | Dados obrigatórios ausentes ou inválidos |
+| `401 Unauthorized` | Token ausente, inválido ou expirado; ou credenciais inválidas |
+| `404 Not Found` | Projeto ou tecnologia não encontrado |
+| `500 Internal Server Error` | Erro interno ou falha no banco de dados |
+
+O Express utiliza `express.json()` para interpretar o corpo das requisições enviadas em JSON.
+
+## 🌐 Teste de CORS — Pré-voo OPTIONS
 
 Comando utilizado:
 
@@ -324,17 +354,9 @@ curl -i -X OPTIONS http://localhost:3000/api/projetos/5 \
   -H "Access-Control-Request-Method: DELETE"
 ```
 
-Resposta recebida:
+O teste verifica se a API responde ao pré-voo CORS e informa os métodos HTTP permitidos.
 
-```http
-HTTP/1.1 204 No Content
-Access-Control-Allow-Origin: *
-Access-Control-Allow-Methods: GET,HEAD,PUT,PATCH,POST,DELETE
-```
-
-O teste confirma que a API responde ao pré-voo CORS e informa os métodos HTTP permitidos.
-
-### 🗄️ Teste com o banco de dados indisponível
+## 🗄️ Teste com o banco de dados indisponível
 
 Para testar o tratamento de erros, o MariaDB foi temporariamente desligado:
 
@@ -342,13 +364,7 @@ Para testar o tratamento de erros, o MariaDB foi temporariamente desligado:
 sudo service mariadb stop
 ```
 
-Uma operação de escrita retornou:
-
-```http
-HTTP/1.1 500 Internal Server Error
-```
-
-O corpo JSON apresentou um erro de conexão com o banco de dados.
+Uma operação que depende do banco pode retornar `500 Internal Server Error`.
 
 Depois, o banco foi reiniciado:
 
@@ -356,36 +372,7 @@ Depois, o banco foi reiniciado:
 sudo service mariadb start
 ```
 
-Uma nova operação de cadastro respondeu `201 Created`, e o projeto de teste foi excluído com sucesso, retornando `204 No Content`.
-
-Esse teste demonstrou que a API trata a falha de conexão e voltou a realizar operações após o banco ser reiniciado, sem precisar reiniciar o processo Node.js.
-
-## 📦 Tratamento de erros HTTP
-
-A API utiliza códigos de status HTTP para informar o resultado das operações:
-
-| Código | Significado |
-|---|---|
-| `200 OK` | Operação realizada com sucesso |
-| `201 Created` | Projeto cadastrado |
-| `204 No Content` | Projeto excluído com sucesso |
-| `400 Bad Request` | Dados obrigatórios ausentes ou inválidos |
-| `404 Not Found` | Projeto ou rota não encontrado |
-| `500 Internal Server Error` | Erro interno ou falha no banco de dados |
-
-O Express utiliza `express.json()` para interpretar o corpo das requisições enviadas em JSON.
-
-## 🔐 Próxima etapa — Aula 24
-
-Na Aula 24, a API em Node.js será ampliada com autenticação e autorização, incluindo:
-
-- Cadastro e armazenamento seguro de senhas com `bcrypt`
-- Rota `POST /api/login`
-- Geração de token JWT
-- Middleware de autenticação
-- Proteção das rotas POST, PUT e DELETE
-- Resposta `401 Unauthorized` para requisições de escrita sem autorização
-- Manutenção das rotas GET públicas
+O teste verifica o tratamento da falha de conexão e a recuperação das operações após o banco ser reiniciado.
 
 ## 📚 Versionamento
 
@@ -393,7 +380,7 @@ O projeto é versionado com Git e hospedado no GitHub.
 
 Repositório: [Nicolas29garcia/PortfolioAngular](https://github.com/Nicolas29garcia/PortfolioAngular)
 
-A Aula 23 foi registrada em um commit que inclui as alterações do `server.js`, deste README e do serviço Angular.
+As aulas são registradas por meio de commits no Git, identificando as alterações realizadas em cada etapa do desenvolvimento.
 
 ## 👨‍💻 Autor
 
@@ -403,3 +390,7 @@ Desenvolvido por **Nicolas Henrique Garcia**.
 **Curso:** Técnico em Informática Integrado ao Ensino Médio  
 **Disciplina:** Desenvolvimento Web II (DWII)  
 **Ano:** 2026
+
+## 🤖 Uso de inteligência artificial
+
+A inteligência artificial foi utilizada como apoio para revisar a documentação, compreender conceitos de autenticação, organizar os testes e auxiliar na identificação de possíveis melhorias. A implementação e os testes devem ser conferidos pelo autor.

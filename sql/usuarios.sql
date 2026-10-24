@@ -1,0 +1,10 @@
+
+-- Aula 24: usuários da API. Nunca armazenar senha em texto puro.
+CREATE TABLE IF NOT EXISTS usuarios (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    email VARCHAR(120) NOT NULL,
+    senha_hash CHAR(60) NOT NULL,
+    criado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

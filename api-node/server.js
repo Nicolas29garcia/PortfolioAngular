@@ -1,21 +1,66 @@
 const express = require('express');
 const cors = require('cors');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const pool = require('./db');
 
 const app = express();
 const PORTA = 3000;
+
+// A chave que assina os tokens. Fica aqui so ate a Aula 29, quando vai para o .env
+const SEGREDO = 'troque-por-uma-frase-longa-que-so-voce-sabe';
 
 // Deixa outra origem (o Angular na porta 4200) chamar esta API.
 app.use(cors());
 // Le o corpo JSON de POST e PUT e o entrega em req.body. Sem isto, req.body e undefined
 app.use(express.json());
 
+// Middleware: confere o token antes de a rota rodar. Entra so nas rotas que o chamam
+function autenticar(req, res, next) {
+  const cabecalho = req.headers.authorization ?? '';
+  const token = cabecalho.replace('Bearer ', '');
+  
+  if (!token) {
+    return res.status(401).json({ erro: 'Token ausente' });
+  }
+  
+  try {
+    req.usuario = jwt.verify(token, SEGREDO);
+    next();
+  } catch (erro) {
+    return res.status(401).json({ erro: 'Token invalido ou expirado' });
+  }
+}
+
 app.get('/', (req, res) => {
     res.send('API do Portfolio em Node: no ar');
 });
 
+// POST /api/login: confere email e senha e devolve o token. A unica rota que ve a senha.
+app.post('/api/login', async (req, res) => {
+  try {
+    const dados = req.body;
+    if (!dados || !dados.email || !dados.senha) {
+      return res.status(400).json({ erro: 'Informe email e senha' });
+    }
+    const [linhas] = await pool.execute('SELECT id, email, senha_hash FROM usuarios WHERE email = ?', [dados.email]);
+    const usuario = linhas[0];
+    if (!usuario) {
+      return res.status(401).json({ erro: 'Email ou senha invalidos' });
+    }
+    const confere = await bcrypt.compare(dados.senha, usuario.senha_hash);
+    if (!confere) {
+      return res.status(401).json({ erro: 'Email ou senha invalidos' });
+    }
+    const token = jwt.sign({ id: usuario.id, email: usuario.email }, SEGREDO, { expiresIn: '2h' });
+    res.json({ token });
+  } catch (erro) {
+    res.status(500).json({ erro: 'Falha no servidor: ' + erro.message });
+  }
+});
+
 // POST cria: os dados vem no corpo, em JSON, e o id nasce no banco.
-app.post('/api/projetos', async (req, res) => {
+app.post('/api/projetos', autenticar, async (req, res) => {
   try {
     const dados = req.body;
     console.log(dados);
@@ -34,7 +79,7 @@ app.post('/api/projetos', async (req, res) => {
 });
 
 // PUT altera: o id vem no caminho (qual projeto) e os dados no corpo (o que gravar).
-app.put('/api/projetos/:id', async (req, res) => {
+app.put('/api/projetos/:id', autenticar, async (req, res) => {
   try {
     const dados = req.body;
     if (!dados || !dados.nome) {
@@ -55,7 +100,7 @@ app.put('/api/projetos/:id', async (req, res) => {
 });
 
 // DELETE apaga: só precisa do id. Não há corpo no pedido, e a resposta também não tem.
-app.delete('/api/projetos/:id', async (req, res) => {
+app.delete('/api/projetos/:id', autenticar, async (req, res) => {
   try {
     const [resultado] = await pool.execute('DELETE FROM projetos WHERE id = ?', [req.params.id]);
     if (resultado.affectedRows === 0) {
