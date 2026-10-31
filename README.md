@@ -394,3 +394,26 @@ Desenvolvido por **Nicolas Henrique Garcia**.
 ## 🤖 Uso de inteligência artificial
 
 A inteligência artificial foi utilizada como apoio para revisar a documentação, compreender conceitos de autenticação, organizar os testes e auxiliar na identificação de possíveis melhorias. A implementação e os testes devem ser conferidos pelo autor.
+
+## ⚛️ Portfólio em React — Aula 25
+
+Nesta aula foi iniciado o desenvolvimento de uma nova versão do portfólio utilizando React e Vite, mantendo o projeto Angular existente no repositório.
+
+O projeto React está localizado na pasta `portfolio-react/`, separado do projeto Angular e da API em Node.js.
+
+### 📂 Estrutura do projeto React
+
+```text
+portfolio-react/
+├── public/
+├── src/
+│   ├── App.jsx
+│   ├── Cabecalho.jsx
+│   ├── CardProjeto.jsx
+│   ├── Rodape.jsx
+│   ├── index.css
+│   └── main.jsx
+├── index.html
+├── package.json
+├── package-lock.json
+└── vite.config.js
