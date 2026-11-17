@@ -436,7 +436,7 @@ O formulário da Aula 26 mantém nome, e-mail e mensagem controlados, saudação
 
 #### Endereço da API
 
-O endereço fica centralizado em `portfolio-react/src/api.js`, sem barra final. **Pendente de confirmação:** a URL antiga encontrada no Angular respondeu HTTP 404 em 17/11/2026, e a conta conectada não listou Codespaces acessíveis. Por isso, `API` está vazia e a interface informa que o endereço não está configurado. Não foi inventada uma URL nem recriado o banco.
+O endereço fica centralizado em `portfolio-react/src/api.js`, sem barra final: `https://refactored-capybara-wr64g4qp54xph54g5-3000.app.github.dev`. Após o dono confirmar por captura a porta 3000 pública e o servidor em execução, as duas consultas responderam HTTP 200 em 17/11/2026: 11 projetos e 6 tecnologias. O endereço vazio que causava o erro de configuração foi corrigido. Nenhum registro ou banco foi alterado.
 
 No Codespace deste repositório, inicie a API e abra o painel **PORTS**. Na linha **3000**, escolha **Port Visibility → Public**, copie o **Forwarded Address** e cole esse endereço real em `src/api.js`. A porta 5173 abre o React; não confunda os dois endereços.
 
@@ -509,7 +509,8 @@ Use o stash recém-criado; não aplique um stash antigo se o comando não tiver 
 - Navegador Chromium com Playwright: configuração ausente, sucesso, espera controlada, HTTP 404/500 (inclusive corpo HTML), falha de conexão, resposta com formato inválido, lista vazia, recuperação pelo botão, independência das consultas, formulário e navegação.
 - Esses cenários de rede foram **simulados por interceptação de requisições somente no navegador**. Os projetos de teste vieram do histórico deste próprio repositório. Nenhum serviço compartilhado foi interrompido e nenhum registro foi alterado.
 - Sem rolagem horizontal nos testes de 1440, 1024, 768, 390 e 320 px. Conferidos foco visível, atalho para conteúdo, movimento reduzido e ausência de exceções JavaScript nos cenários de interface.
-- **Integração real pendente:** o único teste remoto disponível foi a consulta da URL antiga, que retornou 404. Ainda não foi possível validar projetos/tecnologias do banco atual, CORS ou a visibilidade da porta 3000. Não confundir os testes simulados acima com essa validação.
+- **Consultas reais após a correção:** `GET /api/projetos` e `GET /api/tecnologias` responderam HTTP 200, com 11 projetos e 6 tecnologias. A resposta dos projetos incluiu `Access-Control-Allow-Origin: *`. As verificações de falha descritas acima continuam sendo simuladas, sem interrupção dos serviços.
+- A tentativa de teste direto no Chromium do ambiente Cloud encontrou `net::ERR_CERT_AUTHORITY_INVALID` ao acessar a API. O terminal recebeu os dados reais com TLS verificado, mas o teste visual com a API real não foi concluído nesse navegador. Não foi desabilitada a validação de certificados. As capturas abaixo continuam sendo anteriores à correção ou simuladas.
 
 #### Redesign da Aula 27 — commit separado
 
@@ -523,7 +524,7 @@ Capturas de página inteira em `docs/aula-27/`:
 
 | Situação | Desktop (1440 px) | Celular (390 px) | Celular (320 px) |
 |---|---|---|---|
-| Estado atual, endereço da API pendente | [Desktop](docs/aula-27/desktop-api-pendente.png) | [390 px](docs/aula-27/celular-390-api-pendente.png) | [320 px](docs/aula-27/celular-320-api-pendente.png) |
+| Registro anterior à correção, endereço pendente | [Desktop](docs/aula-27/desktop-api-pendente.png) | [390 px](docs/aula-27/celular-390-api-pendente.png) | [320 px](docs/aula-27/celular-320-api-pendente.png) |
 | Prévia **simulada**, com respostas interceptadas | [Desktop simulado](docs/aula-27/desktop-simulado.png) | [390 px simulado](docs/aula-27/celular-390-simulado.png) | [320 px simulado](docs/aula-27/celular-320-simulado.png) |
 
 As prévias simuladas usam os projetos do antigo `projetos.js` deste próprio repositório e tecnologias lidas do seu arquivo SQL, sem executar esse SQL. São evidências do layout, **não** dos registros atuais do banco. Esses dados não estão no aplicativo nem são usados como fallback.

@@ -1,5 +1,4 @@
-// Cole aqui o endereço encaminhado da porta 3000 deste projeto, sem barra final.
-// A URL anterior respondeu 404; o endereço atual aguarda confirmação do dono.
-const API = '';
+// Porta 3000 pública do Codespace deste projeto, conferida nas duas consultas GET.
+const API = 'https://refactored-capybara-wr64g4qp54xph54g5-3000.app.github.dev';
 
 export default API;
