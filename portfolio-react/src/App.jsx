@@ -48,22 +48,33 @@ function App() {
       <main id="conteudo" className="container" tabIndex={-1}>
         <section id="inicio" className="apresentacao" aria-labelledby="titulo-inicio">
           <div className="apresentacao-texto">
-            <p className="eyebrow">Portfólio / Desenvolvimento Web</p>
+            <p className="eyebrow"><span className="indice">01</span> / Portfólio de estudos</p>
             <h1 id="titulo-inicio">Nicolas<span>Henrique Garcia.</span></h1>
             <p className="intro">Estudante de informática. Aprendendo a construir para a web, do primeiro cadastro à API.</p>
             <p className="intro-secundaria">Aqui reúno projetos das aulas de Desenvolvimento Web II.</p>
-            <a className="botao botao-primario" href="#projetos">Conheça os projetos <span className="seta" aria-hidden="true" /></a>
+            <div className="apresentacao-acoes">
+              <a className="botao botao-primario" href="#projetos">Ver projetos <span className="seta" aria-hidden="true" /></a>
+              <a className="botao botao-secundario" href="#contato">Contato</a>
+            </div>
+            <p className="apresentacao-origem">IFPR <span aria-hidden="true">/</span> Campus Ponta Grossa</p>
           </div>
           <aside className="formacao" aria-labelledby="titulo-formacao">
             <div className="formacao-topo">
-              <p className="eyebrow" id="titulo-formacao">Formação</p>
-              <span className="formacao-sigla">IFPR</span>
+              <p className="eyebrow" id="titulo-formacao">Desenvolvimento Web</p>
+              <span className="detalhe-tecnico">DWII / 2026</span>
             </div>
-            <div className="formacao-marca" aria-hidden="true"><span>NG</span></div>
+            <div className="composicao">
+              <div className="geometria" aria-hidden="true"><span>NG</span></div>
+              <ul className="stack" aria-label="Tecnologias presentes neste repositório">
+                <li>React</li>
+                <li>Node.js</li>
+                <li>MariaDB</li>
+              </ul>
+            </div>
             <div className="formacao-texto">
+              <span className="detalhe-tecnico">Em formação</span>
               <h2>Técnico em Informática</h2>
               <p>Integrado ao Ensino Médio</p>
-              <p className="formacao-campus">IFPR — Campus Ponta Grossa</p>
             </div>
           </aside>
         </section>
@@ -75,13 +86,14 @@ function App() {
               <h2 id="titulo-projetos">Código colocado em prática.</h2>
             </div>
             <button className="botao botao-secundario" type="button" onClick={atualizarProjetos} disabled={carregando}>
+              <span className="icone-atualizar" aria-hidden="true">↻</span>
               {carregando ? 'Atualizando...' : 'Atualizar projetos'}
             </button>
           </div>
           <div className="estado-remoto" role="status" aria-live="polite" aria-atomic="true">
             {carregando && <p className="estado">Carregando projetos...</p>}
             {!carregando && !erro && projetos.length === 0 && <p className="estado">Nenhum projeto publicado ainda.</p>}
-            {!carregando && !erro && projetos.length > 0 && <p className="resumo-dados">{projetos.length} projeto(s) recebido(s).</p>}
+            {!carregando && !erro && projetos.length > 0 && <p className="resumo-dados sucesso">{projetos.length} {projetos.length === 1 ? 'projeto publicado' : 'projetos publicados'}</p>}
           </div>
           {erro && <p className="estado erro" role="alert">{erro}</p>}
           <div className="cards" aria-busy={carregando}>

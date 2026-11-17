@@ -393,7 +393,7 @@ Desenvolvido por **Nicolas Henrique Garcia**.
 
 ## 🤖 Uso de inteligência artificial
 
-IA utilizada para implementar a Aula 27, revisar a documentação e executar verificações. O autor deve estudar e conferir o código e os resultados registrados abaixo.
+IA utilizada para implementar a Aula 27 e o redesign, revisar a documentação e executar verificações. O autor deve estudar e conferir o código e os resultados registrados abaixo.
 
 ## ⚛️ Portfólio em React — Aula 25
 
@@ -510,3 +510,20 @@ Use o stash recém-criado; não aplique um stash antigo se o comando não tiver 
 - Esses cenários de rede foram **simulados por interceptação de requisições somente no navegador**. Os projetos de teste vieram do histórico deste próprio repositório. Nenhum serviço compartilhado foi interrompido e nenhum registro foi alterado.
 - Sem rolagem horizontal nos testes de 1440, 1024, 768, 390 e 320 px. Conferidos foco visível, atalho para conteúdo, movimento reduzido e ausência de exceções JavaScript nos cenários de interface.
 - **Integração real pendente:** o único teste remoto disponível foi a consulta da URL antiga, que retornou 404. Ainda não foi possível validar projetos/tecnologias do banco atual, CORS ou a visibilidade da porta 3000. Não confundir os testes simulados acima com essa validação.
+
+#### Redesign da Aula 27 — commit separado
+
+O CSS do React foi reescrito com variáveis para fundo `#080D18`, superfícies `#111B2E`, texto `#EAF0FA` e destaque `#45D6E8`. O nome, a formação e a descrição de Nicolas foram preservados. A apresentação ganhou duas ações e uma composição geométrica com as iniciais NG e tecnologias presentes no repositório. Os projetos usam etiquetas de tecnologias, o catálogo tem uma lista compacta própria e o contato fica em duas colunas no desktop.
+
+Foram mantidos foco de teclado visível, atalho para conteúdo, mensagens textuais de estado e respeito a `prefers-reduced-motion`. Links de projetos só são criados para endereços HTTP/HTTPS válidos, excluindo os destinos de exemplo `github.com/usuario/`; os dados recebidos não são alterados. As cores de erro e confirmação são acompanhadas por texto e indicadores.
+
+Após o redesign, build e lint passaram e os cenários de interface foram repetidos no Chromium com Playwright. O formulário também foi exercitado no Chrome compartilhado. Em 320 px foram conferidos formulário, navegação, textos longos e links inválidos. Não houve rolagem horizontal, exceções JavaScript, avisos de `key` ou requisições de escrita nos testes.
+
+Capturas de página inteira em `docs/aula-27/`:
+
+| Situação | Desktop (1440 px) | Celular (390 px) | Celular (320 px) |
+|---|---|---|---|
+| Estado atual, endereço da API pendente | [Desktop](docs/aula-27/desktop-api-pendente.png) | [390 px](docs/aula-27/celular-390-api-pendente.png) | [320 px](docs/aula-27/celular-320-api-pendente.png) |
+| Prévia **simulada**, com respostas interceptadas | [Desktop simulado](docs/aula-27/desktop-simulado.png) | [390 px simulado](docs/aula-27/celular-390-simulado.png) | [320 px simulado](docs/aula-27/celular-320-simulado.png) |
+
+As prévias simuladas usam os projetos do antigo `projetos.js` deste próprio repositório e tecnologias lidas do seu arquivo SQL, sem executar esse SQL. São evidências do layout, **não** dos registros atuais do banco. Esses dados não estão no aplicativo nem são usados como fallback.

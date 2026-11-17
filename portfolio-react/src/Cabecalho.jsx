@@ -6,7 +6,7 @@ function Cabecalho() {
       <a className="skip-link" href="#conteudo">Pular para o conteúdo</a>
       <a className="identidade" href="#inicio" aria-label="Nicolas Henrique Garcia — início">
         <span className="monograma" aria-hidden="true">NG<span /></span>
-        <span>Nicolas Henrique Garcia</span>
+        <span className="identidade-nome">Nicolas Henrique Garcia</span>
       </a>
       <nav aria-label="Navegação principal">
         <a href="#inicio"><span aria-hidden="true">01</span> Início</a>

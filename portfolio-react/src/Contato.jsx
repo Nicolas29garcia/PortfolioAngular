@@ -21,7 +21,7 @@ function Contato() {
     <section id="contato" className="contato" aria-labelledby="titulo-contato">
       <div className="contato-intro">
         <p className="eyebrow"><span className="indice">04</span> / Contato</p>
-        <h2 id="titulo-contato">Uma ideia começa<br />com uma mensagem.</h2>
+        <h2 id="titulo-contato">Uma ideia começa com uma mensagem.</h2>
         <p>Um formulário de estudo para experimentar o que estou aprendendo em React.</p>
         <div className="nota-demo" id="nota-demo">
           <span className="eyebrow">Demonstração local</span>
