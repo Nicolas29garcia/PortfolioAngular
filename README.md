@@ -116,7 +116,9 @@ api-node/
 └── .gitignore
 
 portfolio-angular/sql/
-├── setup.sql
+└── setup.sql
+
+sql/
 └── usuarios.sql
 ```
 
@@ -128,7 +130,9 @@ portfolio-angular/sql/
 sudo service mariadb start
 ```
 
-**2. Criar e preparar o banco de dados**
+**2. Criar e preparar o banco de dados — apenas em instalação nova**
+
+O `setup.sql` contém `DROP DATABASE`. **Não o execute sobre o banco atual do Codespace.** Para atualizar esta entrega, preserve o banco e os usuários existentes; instale as dependências e reinicie somente a API quando conveniente.
 
 Na raiz do repositório:
 
@@ -139,7 +143,7 @@ sudo mariadb < portfolio-angular/sql/setup.sql
 **3. Criar a tabela de usuários**
 
 ```bash
-sudo mariadb dwii_db < portfolio-angular/sql/usuarios.sql
+sudo mariadb dwii_db < sql/usuarios.sql
 ```
 
 O arquivo `usuarios.sql` cria a tabela `usuarios`, que armazena o e-mail e o hash da senha.
@@ -153,15 +157,15 @@ npm install
 
 **5. Criar o usuário administrador**
 
-Execute o comando com o e-mail e a senha escolhidos para o dono do portfólio:
+Nicolas deve executar no próprio Codespace, usando um e-mail seu. O endereço abaixo foi confirmado no histórico Git deste projeto; ele pode escolher outro e-mail próprio:
 
 ```bash
-node criar-usuario.js dono@portfolio.dev <senha>
+node criar-usuario.js 20241ctb0100076@estudantes.ifpr.edu.br
 ```
 
-Substitua `<senha>` pela senha escolhida no terminal. O script utiliza `bcryptjs` para gerar o hash antes de salvar a senha no banco.
+O script solicita e confirma a senha em um prompt oculto, gera `bcrypt.hash` e executa um `INSERT` parametrizado. Não passe a senha como argumento, não a envie no chat e não publique senha, hash ou token. E-mail já cadastrado é recusado sem apagar ou alterar usuários. A senha é definida exclusivamente por Nicolas.
 
-**Importante:** não publique a senha real, o hash da senha ou tokens JWT no repositório.
+**Pendente no Codespace:** não tive acesso ao banco existente para confirmar ou criar o dono. A conta temporária dos testes abaixo não é o dono e foi removida. Não use `dono@portfolio.dev` como identidade do projeto e não apague usuários antigos para corrigir essa configuração.
 
 **6. Iniciar o servidor**
 
@@ -177,117 +181,683 @@ http://localhost:3000
 
 Mantenha o terminal do servidor aberto enquanto executa os testes em outro terminal.
 
-### 🔐 Login e autenticação — Aula 24
+### 🔐 Login e autenticação — Aula 24 / correção da Entrega A
 
-A rota `POST /api/login` recebe o e-mail e a senha, verifica o usuário no banco e compara a senha informada com o hash armazenado.
+O login consulta o usuário com SQL parametrizado, usa `bcrypt.compare` e emite um JWT de **30 minutos**. O middleware `autenticar` é compartilhado pelas seis escritas de projetos e tecnologias. As mensagens 401 foram aprovadas por Nicolas nesta revisão:
 
-Em caso de sucesso, a API retorna um token JWT. Nas rotas protegidas, o token deve ser enviado no cabeçalho `Authorization` usando o formato `Bearer`.
+- Login: “Não foi possível entrar: confira seu e-mail e sua senha.”
+- Sem token: “Entre na sua conta para alterar o portfólio.”
+- Token inválido ou expirado: “Sua sessão não é válida. Entre novamente.”
 
-O middleware `autenticar` verifica o token antes de permitir a execução da rota.
+Senha incorreta e e-mail inexistente recebem a mesma mensagem para não revelar quais e-mails estão cadastrados.
 
-#### 1. Login válido
+#### Ambiente e alcance das evidências reais — 17/11/2026
+
+As respostas abaixo foram obtidas com `curl` executando o `server.js` desta correção contra **MariaDB 10.11.19-MariaDB-ubu2204 real**, em um contêiner Docker isolado no ambiente Cloud. Não foram usados mocks nem respostas copiadas do manual. O banco existente do Codespace, seus usuários e seus projetos não foram acessados para escrita.
+
+A API de teste usou a porta **3101** e um pool `mysql2` apontado para `entrega_a_teste` por um inicializador de teste externo ao repositório. O `db.js` de produção foi preservado. Foram criadas somente tabelas novas com o esquema do projeto e registros marcados `[TESTE ENTREGA A 20261117]`. A conta `teste.entrega-a@exemplo.invalid` é exclusiva dos testes, com senha aleatória temporária, e foi removida. Senhas e tokens estão ocultos nas transcrições.
 
 ```bash
-curl -i -X POST http://localhost:3000/api/login \
+API=http://127.0.0.1:3101
+```
+
+Os sete casos numerados são os sete pedidos de autenticação exigidos no PDF. IDs são os que o banco isolado realmente gerou; não os reutilize para editar registros do Codespace. O JWT retornado teve `exp - iat = 1800` segundos. Os testes adicionais verificam a exclusão autenticada, os erros, o catálogo e as seis rejeições de escrita sem token.
+
+##### 1. Login correto com conta temporária isolada
+
+```bash
+curl -i -X POST "$API/api/login" \
   -H "Content-Type: application/json" \
-  -d '{"email":"dono@portfolio.dev","senha":"<senha>"}'
+  -d '{"email":"teste.entrega-a@exemplo.invalid","senha":"<senha>"}'
 ```
 
-Resposta esperada: `200 OK`, com um corpo JSON contendo `token`.
+Recebido:
 
-Substitua `<senha>` pela senha real do administrador somente no terminal. Não coloque a senha real no README.
+```http
+HTTP/1.1 200 OK
+{"token":"<token ocultado>"}
+```
 
-#### 2. Login inválido
+##### 2. Login com senha incorreta
 
 ```bash
-curl -i -X POST http://localhost:3000/api/login \
+curl -i -X POST "$API/api/login" \
   -H "Content-Type: application/json" \
-  -d '{"email":"dono@portfolio.dev","senha":"senha_incorreta"}'
+  -d '{"email":"teste.entrega-a@exemplo.invalid","senha":"<senha>"}'
 ```
 
-Resposta esperada: `401 Unauthorized`.
+Recebido:
 
-Corpo esperado:
-
-```json
-{
-  "erro": "Email ou senha invalidos"
-}
+```http
+HTTP/1.1 401 Unauthorized
+{"erro":"Não foi possível entrar: confira seu e-mail e sua senha."}
 ```
 
-A API utiliza a mesma mensagem para e-mail inexistente e senha incorreta, evitando revelar se determinado e-mail está cadastrado.
-
-#### 3. Configurar o token no terminal
-
-Depois de fazer login, copie o token retornado e configure a variável no terminal:
+##### Login com e-mail inexistente: mesma resposta
 
 ```bash
-TOKEN='<token_recebido_no_login>'
-```
-
-O valor acima é um exemplo. Utilize o token real retornado pela API.
-
-#### 4. POST sem token
-
-```bash
-curl -i -X POST http://localhost:3000/api/projetos \
+curl -i -X POST "$API/api/login" \
   -H "Content-Type: application/json" \
-  -d '{"nome":"Projeto de teste","ano":2026}'
+  -d '{"email":"inexistente@exemplo.invalid","senha":"<senha>"}'
 ```
 
-Resposta esperada: `401 Unauthorized`.
+Recebido:
 
-```json
-{
-  "erro": "Token ausente"
-}
+```http
+HTTP/1.1 401 Unauthorized
+{"erro":"Não foi possível entrar: confira seu e-mail e sua senha."}
 ```
 
-#### 5. POST com token
+##### Login sem campos obrigatórios
 
 ```bash
-curl -i -X POST http://localhost:3000/api/projetos \
+curl -i -X POST "$API/api/login" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+Recebido:
+
+```http
+HTTP/1.1 400 Bad Request
+{"erro":"Informe email e senha"}
+```
+
+##### 3. POST de projeto sem token
+
+```bash
+curl -i -X POST "$API/api/projetos" \
+  -H "Content-Type: application/json" \
+  -d '{"nome":"[TESTE ENTREGA A 20261117]"}'
+```
+
+Recebido:
+
+```http
+HTTP/1.1 401 Unauthorized
+{"erro":"Entre na sua conta para alterar o portfólio."}
+```
+
+##### 4. POST de projeto com token
+
+```bash
+curl -i -X POST "$API/api/projetos" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"nome":"Projeto de teste","ano":2026}'
+  -d '{"nome":"[TESTE ENTREGA A 20261117]","descricao":"Registro temporário de verificação","tecnologias":"Node.js","ano":2026}'
 ```
 
-Resposta esperada: `201 Created`, com o ID gerado pelo banco de dados.
+Recebido:
 
-#### 6. PUT com token
+```http
+HTTP/1.1 201 Created
+{"id":1}
+```
+
+##### 5. PUT de projeto com token
 
 ```bash
-curl -i -X PUT http://localhost:3000/api/projetos/20 \
+curl -i -X PUT "$API/api/projetos/1" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"nome":"Projeto com tranca (editado)","ano":2026}'
+  -d '{"nome":"[TESTE ENTREGA A 20261117] editado","ano":2026}'
 ```
 
-Resposta esperada, caso o projeto exista: `200 OK`.
+Recebido:
 
-```json
-{
-  "mensagem": "Projeto atualizado"
-}
+```http
+HTTP/1.1 200 OK
+{"mensagem":"Projeto atualizado"}
 ```
 
-O ID `20` é um exemplo baseado nos testes realizados no banco. Confira se o projeto ainda existe antes de executar o comando.
-
-#### 7. DELETE sem token
+##### 6. DELETE de projeto sem token
 
 ```bash
-curl -i -X DELETE http://localhost:3000/api/projetos/20
+curl -i -X DELETE "$API/api/projetos/1"
 ```
 
-Resposta esperada: `401 Unauthorized`, pois a autenticação é verificada antes de a exclusão ser executada.
+Recebido:
 
-#### 8. GET público sem token
+```http
+HTTP/1.1 401 Unauthorized
+{"erro":"Entre na sua conta para alterar o portfólio."}
+```
+
+##### 7. GET público de projetos sem token
 
 ```bash
-curl -i http://localhost:3000/api/projetos
+curl -i -X GET "$API/api/projetos"
 ```
 
-Resposta esperada: `200 OK`, com a lista de projetos publicados. A consulta pública não exige token.
+Recebido:
+
+```http
+HTTP/1.1 200 OK
+[{"id":1,"nome":"[TESTE ENTREGA A 20261117] editado","descricao":"","tecnologias":"","link_github":"","ano":2026}]
+```
+
+##### GET público de projeto pelo id
+
+```bash
+curl -i -X GET "$API/api/projetos/1"
+```
+
+Recebido:
+
+```http
+HTTP/1.1 200 OK
+{"id":1,"nome":"[TESTE ENTREGA A 20261117] editado","descricao":"","tecnologias":"","link_github":"","ano":2026}
+```
+
+##### PUT de projeto sem token
+
+```bash
+curl -i -X PUT "$API/api/projetos/1" \
+  -H "Content-Type: application/json" \
+  -d '{"nome":"[TESTE ENTREGA A 20261117]"}'
+```
+
+Recebido:
+
+```http
+HTTP/1.1 401 Unauthorized
+{"erro":"Entre na sua conta para alterar o portfólio."}
+```
+
+##### POST de projeto sem nome
+
+```bash
+curl -i -X POST "$API/api/projetos" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+Recebido:
+
+```http
+HTTP/1.1 400 Bad Request
+{"erro":"Informe pelo menos o nome do projeto"}
+```
+
+##### PUT de projeto sem nome
+
+```bash
+curl -i -X PUT "$API/api/projetos/1" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+Recebido:
+
+```http
+HTTP/1.1 400 Bad Request
+{"erro":"Informe pelo menos o nome do projeto"}
+```
+
+##### DELETE de projeto com token
+
+```bash
+curl -i -X DELETE "$API/api/projetos/1" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Recebido:
+
+```http
+HTTP/1.1 204 No Content
+
+```
+
+Sem corpo na resposta `204 No Content`.
+
+##### GET de projeto inexistente
+
+```bash
+curl -i -X GET "$API/api/projetos/1"
+```
+
+Recebido:
+
+```http
+HTTP/1.1 404 Not Found
+{"erro":"Projeto nao encontrado"}
+```
+
+##### PUT de projeto inexistente
+
+```bash
+curl -i -X PUT "$API/api/projetos/1" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"nome":"[TESTE ENTREGA A 20261117]"}'
+```
+
+Recebido:
+
+```http
+HTTP/1.1 404 Not Found
+{"erro":"Projeto nao encontrado"}
+```
+
+##### DELETE de projeto inexistente
+
+```bash
+curl -i -X DELETE "$API/api/projetos/1" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Recebido:
+
+```http
+HTTP/1.1 404 Not Found
+{"erro":"Projeto nao encontrado"}
+```
+
+##### POST de tecnologia sem token
+
+```bash
+curl -i -X POST "$API/api/tecnologias" \
+  -H "Content-Type: application/json" \
+  -d '{"nome":"[TESTE ENTREGA A 20261117]"}'
+```
+
+Recebido:
+
+```http
+HTTP/1.1 401 Unauthorized
+{"erro":"Entre na sua conta para alterar o portfólio."}
+```
+
+##### PUT de tecnologia sem token
+
+```bash
+curl -i -X PUT "$API/api/tecnologias/1" \
+  -H "Content-Type: application/json" \
+  -d '{"nome":"[TESTE ENTREGA A 20261117]"}'
+```
+
+Recebido:
+
+```http
+HTTP/1.1 401 Unauthorized
+{"erro":"Entre na sua conta para alterar o portfólio."}
+```
+
+##### DELETE de tecnologia sem token
+
+```bash
+curl -i -X DELETE "$API/api/tecnologias/1"
+```
+
+Recebido:
+
+```http
+HTTP/1.1 401 Unauthorized
+{"erro":"Entre na sua conta para alterar o portfólio."}
+```
+
+##### POST de tecnologia com token
+
+```bash
+curl -i -X POST "$API/api/tecnologias" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"nome":"[TESTE ENTREGA A 20261117]","categoria":"Testes","descricao":"Registro temporário","ano_criacao":2026}'
+```
+
+Recebido:
+
+```http
+HTTP/1.1 201 Created
+{"id":1}
+```
+
+##### PUT de tecnologia com token
+
+```bash
+curl -i -X PUT "$API/api/tecnologias/1" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"nome":"[TESTE ENTREGA A 20261117] '"'"' parametrizado","categoria":"Testes","ano_criacao":2026}'
+```
+
+Recebido:
+
+```http
+HTTP/1.1 200 OK
+{"mensagem":"Tecnologia atualizada"}
+```
+
+##### GET público do catálogo sem token
+
+```bash
+curl -i -X GET "$API/api/tecnologias"
+```
+
+Recebido:
+
+```http
+HTTP/1.1 200 OK
+[{"id":1,"nome":"[TESTE ENTREGA A 20261117] ' parametrizado","categoria":"Testes","descricao":"","ano_criacao":2026}]
+```
+
+##### POST de tecnologia sem nome
+
+```bash
+curl -i -X POST "$API/api/tecnologias" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+Recebido:
+
+```http
+HTTP/1.1 400 Bad Request
+{"erro":"Informe o nome da tecnologia com até 100 caracteres"}
+```
+
+##### POST de tecnologia nome vazio
+
+```bash
+curl -i -X POST "$API/api/tecnologias" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"nome":" "}'
+```
+
+Recebido:
+
+```http
+HTTP/1.1 400 Bad Request
+{"erro":"Informe o nome da tecnologia com até 100 caracteres"}
+```
+
+##### POST de tecnologia ano inválido
+
+```bash
+curl -i -X POST "$API/api/tecnologias" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"nome":"[TESTE ENTREGA A 20261117]","ano_criacao":"2026"}'
+```
+
+Recebido:
+
+```http
+HTTP/1.1 400 Bad Request
+{"erro":"Confira categoria, descrição e ano de criação da tecnologia"}
+```
+
+##### POST de tecnologia categoria inválida
+
+```bash
+curl -i -X POST "$API/api/tecnologias" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"nome":"[TESTE ENTREGA A 20261117]","categoria":123}'
+```
+
+Recebido:
+
+```http
+HTTP/1.1 400 Bad Request
+{"erro":"Confira categoria, descrição e ano de criação da tecnologia"}
+```
+
+##### PUT de tecnologia sem nome
+
+```bash
+curl -i -X PUT "$API/api/tecnologias/1" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+Recebido:
+
+```http
+HTTP/1.1 400 Bad Request
+{"erro":"Informe o nome da tecnologia com até 100 caracteres"}
+```
+
+##### PUT de tecnologia com id inválido
+
+```bash
+curl -i -X PUT "$API/api/tecnologias/abc" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"nome":"[TESTE ENTREGA A 20261117]"}'
+```
+
+Recebido:
+
+```http
+HTTP/1.1 400 Bad Request
+{"erro":"Informe um id de tecnologia inteiro e positivo"}
+```
+
+##### DELETE de tecnologia com id inválido
+
+```bash
+curl -i -X DELETE "$API/api/tecnologias/0" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Recebido:
+
+```http
+HTTP/1.1 400 Bad Request
+{"erro":"Informe um id de tecnologia inteiro e positivo"}
+```
+
+##### DELETE de tecnologia com token
+
+```bash
+curl -i -X DELETE "$API/api/tecnologias/1" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Recebido:
+
+```http
+HTTP/1.1 204 No Content
+
+```
+
+Sem corpo na resposta `204 No Content`.
+
+##### PUT de tecnologia inexistente
+
+```bash
+curl -i -X PUT "$API/api/tecnologias/1" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"nome":"[TESTE ENTREGA A 20261117]"}'
+```
+
+Recebido:
+
+```http
+HTTP/1.1 404 Not Found
+{"erro":"Tecnologia nao encontrada"}
+```
+
+##### DELETE de tecnologia inexistente
+
+```bash
+curl -i -X DELETE "$API/api/tecnologias/1" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Recebido:
+
+```http
+HTTP/1.1 404 Not Found
+{"erro":"Tecnologia nao encontrada"}
+```
+
+##### Token inválido
+
+```bash
+curl -i -X POST "$API/api/projetos" \
+  -H "Authorization: Bearer $TOKEN_INVALIDO" \
+  -H "Content-Type: application/json" \
+  -d '{"nome":"[TESTE ENTREGA A 20261117]"}'
+```
+
+Recebido:
+
+```http
+HTTP/1.1 401 Unauthorized
+{"erro":"Sua sessão não é válida. Entre novamente."}
+```
+
+##### Token expirado
+
+```bash
+curl -i -X POST "$API/api/tecnologias" \
+  -H "Authorization: Bearer $TOKEN_EXPIRADO" \
+  -H "Content-Type: application/json" \
+  -d '{"nome":"[TESTE ENTREGA A 20261117]"}'
+```
+
+Recebido:
+
+```http
+HTTP/1.1 401 Unauthorized
+{"erro":"Sua sessão não é válida. Entre novamente."}
+```
+
+#### Falhas reais do banco isolado
+
+Uma segunda instância desta mesma API na porta 3102 foi conectada a um banco inexistente da instância MariaDB de teste. O servidor MariaDB gerou o erro real de conexão, convertido em JSON pelos `catch`. Nenhum serviço compartilhado foi interrompido. Estes comandos exigem essa configuração isolada; não altere a conexão do Codespace para reproduzi-los.
+
+```bash
+API_FALHA=http://127.0.0.1:3102
+```
+
+##### Falha real de conexão ao banco isolado: GET /api/projetos
+
+```bash
+curl -i -X GET "$API_FALHA/api/projetos"
+```
+
+Recebido:
+
+```http
+HTTP/1.1 500 Internal Server Error
+{"erro":"Falha no servidor: Unknown database 'entrega_a_inexistente'"}
+```
+
+##### Falha real de conexão ao banco isolado: GET /api/tecnologias
+
+```bash
+curl -i -X GET "$API_FALHA/api/tecnologias"
+```
+
+Recebido:
+
+```http
+HTTP/1.1 500 Internal Server Error
+{"erro":"Falha no servidor: Unknown database 'entrega_a_inexistente'"}
+```
+
+##### Falha real de conexão ao banco isolado: POST /api/tecnologias
+
+```bash
+curl -i -X POST "$API_FALHA/api/tecnologias" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"nome":"[TESTE ENTREGA A 20261117]"}'
+```
+
+Recebido:
+
+```http
+HTTP/1.1 500 Internal Server Error
+{"erro":"Falha no servidor: Unknown database 'entrega_a_inexistente'"}
+```
+
+##### Falha real de conexão ao banco isolado: PUT /api/tecnologias/1
+
+```bash
+curl -i -X PUT "$API_FALHA/api/tecnologias/1" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"nome":"[TESTE ENTREGA A 20261117]"}'
+```
+
+Recebido:
+
+```http
+HTTP/1.1 500 Internal Server Error
+{"erro":"Falha no servidor: Unknown database 'entrega_a_inexistente'"}
+```
+
+##### Falha real de conexão ao banco isolado: DELETE /api/tecnologias/1
+
+```bash
+curl -i -X DELETE "$API_FALHA/api/tecnologias/1" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Recebido:
+
+```http
+HTTP/1.1 500 Internal Server Error
+{"erro":"Falha no servidor: Unknown database 'entrega_a_inexistente'"}
+```
+
+#### Limpeza, script do dono e limites da verificação
+
+Depois das requisições, a contagem de `projetos`, `tecnologias` e `usuarios` no banco isolado voltou a zero. Também foi testado o `criar-usuario.js` em pseudoterminal: senha oculta, criação com hash, rejeição de e-mail duplicado sem alteração e rejeição de confirmação divergente. O usuário temporário desse teste foi removido pelo e-mail reservado e ID criado. Nenhum `setup.sql` foi executado sobre banco existente.
+
+Passaram `node --check api-node/server.js` e `node --check api-node/criar-usuario.js`. O pacote da API não oferece lint nem suíte npm configurados; seu `npm test` é apenas o placeholder original e não foi apresentado como teste aprovado.
+
+Não foi validado o login do dono no banco do Codespace: Nicolas precisa criá-lo ou confirmar que seu e-mail próprio já existe e repetir os sete casos. Os resultados isolados acima não comprovam essa configuração pessoal.
+
+#### Repetir no Codespace com a conta de Nicolas
+
+Após revisar `git status --short --branch`, `git diff` e `git diff --cached`, guarde alterações pendentes antes de integrar `origin/main`. Não substitua arquivos locais sem comparar. Se estiver em `main` com árvore limpa, use `git pull --ff-only origin main`.
+
+Terminal da API (não inicie outra cópia se a porta 3000 já estiver ocupada):
+
+```bash
+cd /workspaces/PortfolioAngular
+sudo service mariadb start
+cd api-node
+npm ci
+node server.js
+```
+
+Depois de atualizar o `server.js`, reinicie apenas o processo da API no terminal dele; não pare MariaDB nem outros serviços para simular erros. O React pode continuar rodando.
+
+Para repetir os comandos acima, use `API=http://localhost:3000`. Faça o login com o e-mail próprio e a senha digitada somente no terminal. Para não salvar a senha no histórico, pode usar:
+
+```bash
+API=http://localhost:3000
+read -r -p 'Seu e-mail: ' EMAIL_NICOLAS
+read -r -s -p 'Sua senha: ' SENHA_NICOLAS
+printf '\n'
+LOGIN_NICOLAS=$(printf '%s\n%s' "$EMAIL_NICOLAS" "$SENHA_NICOLAS" | node -e '
+let entrada = "";
+process.stdin.on("data", parte => entrada += parte);
+process.stdin.on("end", () => {
+  const quebra = entrada.indexOf("\n");
+  process.stdout.write(JSON.stringify({email: entrada.slice(0, quebra), senha: entrada.slice(quebra + 1)}));
+});')
+unset SENHA_NICOLAS
+printf '%s' "$LOGIN_NICOLAS" | curl -i -sS -X POST "$API/api/login" \
+  -H 'Content-Type: application/json' --data-binary @-
+unset LOGIN_NICOLAS
+read -r -s -p 'Cole o token recebido (não será exibido): ' TOKEN
+printf '\n'
+```
+
+**Pendente:** o pedido acima não foi executado com a conta pessoal do dono; portanto ainda não há resposta real dele para transcrever. O token fica em variável local; nunca o publique. Refaça os sete pedidos numerados usando IDs criados por você. Na transcrição para o README, substitua senha por `<senha>` e token por `<token ocultado>`. Não reutilize os IDs 1 das evidências para alterar registros existentes. Guarde as respostas novas antes de considerar o dono e a execução no Codespace verificados.
 
 ### 📋 Operações da API
 
@@ -295,7 +865,6 @@ Resposta esperada: `200 OK`, com a lista de projetos publicados. A consulta púb
 |---|---|---|---|
 | GET | `/api/projetos` | Pública | `200 OK` |
 | GET | `/api/projetos/:id` | Pública | `200 OK` |
-| GET | `/api/projetos/todos` | Token obrigatório | `200 OK` |
 | POST | `/api/projetos` | Token obrigatório | `201 Created` |
 | PUT | `/api/projetos/:id` | Token obrigatório | `200 OK` |
 | DELETE | `/api/projetos/:id` | Token obrigatório | `204 No Content` |
@@ -311,7 +880,7 @@ As rotas protegidas retornam `401 Unauthorized` quando o token está ausente, in
 
 A rota pública `GET /api/projetos` retorna somente projetos com status `publicado`.
 
-A rota protegida `GET /api/projetos/todos` permite consultar todos os projetos, inclusive os que estão em rascunho, mediante token JWT válido.
+A rota `/api/projetos/todos` não está implementada nesta correção. Ela pertence ao nível A da entrega; esta revisão trata os requisitos de B. A documentação anterior afirmava sua existência incorretamente.
 
 ### ⏱️ Validade do token
 
@@ -344,35 +913,13 @@ A API utiliza códigos de status HTTP para informar o resultado das operações:
 
 O Express utiliza `express.json()` para interpretar o corpo das requisições enviadas em JSON.
 
-## 🌐 Teste de CORS — Pré-voo OPTIONS
+## 🌐 CORS e falhas de banco
 
-Comando utilizado:
+A API mantém `cors()` antes das rotas. Não interrompa MariaDB compartilhado para testar erros; as respostas 500 desta revisão foram obtidas na conexão isolada descrita nas evidências da Entrega A. Os comandos de falha antigos, sem transcrições verificáveis, foram substituídos por essas evidências reais.
 
-```bash
-curl -i -X OPTIONS http://localhost:3000/api/projetos/5 \
-  -H "Origin: http://localhost:4200" \
-  -H "Access-Control-Request-Method: DELETE"
-```
+## Autoavaliação da Entrega A — para revisão de Nicolas
 
-O teste verifica se a API responde ao pré-voo CORS e informa os métodos HTTP permitidos.
-
-## 🗄️ Teste com o banco de dados indisponível
-
-Para testar o tratamento de erros, o MariaDB foi temporariamente desligado:
-
-```bash
-sudo service mariadb stop
-```
-
-Uma operação que depende do banco pode retornar `500 Internal Server Error`.
-
-Depois, o banco foi reiniciado:
-
-```bash
-sudo service mariadb start
-```
-
-O teste verifica o tratamento da falha de conexão e a recuperação das operações após o banco ser reiniciado.
+**B pretendido, condicionado à configuração e conferência do dono no Codespace.** As escritas de catálogo e a tranca estão em `api-node/server.js`; a validade de 30 minutos e as mensagens 401 estão no mesmo arquivo e nas seções de autenticação/validade deste README; os sete pedidos e os testes adicionais estão em “Login e autenticação — Aula 24 / correção da Entrega A”. O hash e o prompt oculto estão em `api-node/criar-usuario.js`; os dois limites reais estão em “O que esta API ainda não faz”. Não declaro B plenamente comprovado enquanto faltar conferir o dono com e-mail próprio no banco existente. Não foi implementado o nível A nem reescrito o histórico.
 
 ## 📚 Versionamento
 
@@ -390,10 +937,6 @@ Desenvolvido por **Nicolas Henrique Garcia**.
 **Curso:** Técnico em Informática Integrado ao Ensino Médio  
 **Disciplina:** Desenvolvimento Web II (DWII)  
 **Ano:** 2026
-
-## 🤖 Uso de inteligência artificial
-
-IA utilizada para implementar a Aula 27 e o redesign, revisar a documentação e executar verificações. O autor deve estudar e conferir o código e os resultados registrados abaixo.
 
 ## ⚛️ Portfólio em React — Aula 25
 
@@ -464,10 +1007,7 @@ npm run dev -- --host 0.0.0.0
 
 Se a API já estiver rodando, reutilize o serviço. Em outro terminal, confira as consultas públicas sem alterar registros:
 
-```bash
-curl -i http://localhost:3000/api/projetos
-curl -i http://localhost:3000/api/tecnologias
-```
+Use os comandos de GET público de projetos e catálogo com as respostas registradas na seção “Login e autenticação — Aula 24 / correção da Entrega A”, ajustando `API=http://localhost:3000` no Codespace.
 
 Validação do React:
 
@@ -528,3 +1068,7 @@ Capturas de página inteira em `docs/aula-27/`:
 | Prévia **simulada**, com respostas interceptadas | [Desktop simulado](docs/aula-27/desktop-simulado.png) | [390 px simulado](docs/aula-27/celular-390-simulado.png) | [320 px simulado](docs/aula-27/celular-320-simulado.png) |
 
 As prévias simuladas usam os projetos do antigo `projetos.js` deste próprio repositório e tecnologias lidas do seu arquivo SQL, sem executar esse SQL. São evidências do layout, **não** dos registros atuais do banco. Esses dados não estão no aplicativo nem são usados como fallback.
+
+## 🤖 Uso de inteligência artificial
+
+IA utilizada na Aula 27 e no redesign, e para corrigir a API da Entrega A, organizar evidências e executar testes com MariaDB isolado. Nicolas deve revisar o código e concluir a configuração do dono no Codespace.
