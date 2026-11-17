@@ -1,11 +1,47 @@
+import { useEffect, useState } from 'react';
+import API from './api.js';
 import Cabecalho from './Cabecalho.jsx';
 import CardProjeto from './CardProjeto.jsx';
+import Catalogo from './Catalogo.jsx';
 import Contato from './Contato.jsx';
 import Rodape from './Rodape.jsx';
-import projetos from './projetos.js';
 
 // App: O componente raiz. Ele monta a página com os outros componentes.
 function App() {
+  const [projetos, setProjetos] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState('');
+
+  async function buscarProjetos() {
+    try {
+      if (!API) throw new Error('endereço da API ainda não configurado');
+      const resposta = await fetch(API + '/api/projetos');
+      if (!resposta.ok) {
+        throw new Error('a API respondeu HTTP ' + resposta.status);
+      }
+      const dados = await resposta.json();
+      if (!Array.isArray(dados)) throw new Error('a API não retornou uma lista');
+      setProjetos(dados);
+    } catch (falha) {
+      setProjetos([]);
+      setErro('Não deu para carregar os projetos: ' + falha.message + '.');
+    } finally {
+      setCarregando(false);
+    }
+  }
+
+  function atualizarProjetos() {
+    setCarregando(true);
+    setErro('');
+    buscarProjetos();
+  }
+
+  // [] inicia a busca na montagem; o botão reutiliza a mesma função.
+  useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- A Aula 27 sincroniza dados remotos por uma função assíncrona.
+    buscarProjetos();
+  }, []);
+
   return (
     <>
       <Cabecalho />
@@ -38,10 +74,18 @@ function App() {
               <p className="eyebrow"><span className="indice">02</span> / Projetos</p>
               <h2 id="titulo-projetos">Código colocado em prática.</h2>
             </div>
-            <p>Quatro projetos de aula.<br />Diferentes partes do desenvolvimento web.</p>
+            <button className="botao botao-secundario" type="button" onClick={atualizarProjetos} disabled={carregando}>
+              {carregando ? 'Atualizando...' : 'Atualizar projetos'}
+            </button>
           </div>
-          <div className="cards">
-            {projetos.map((p) => (
+          <div className="estado-remoto" role="status" aria-live="polite" aria-atomic="true">
+            {carregando && <p className="estado">Carregando projetos...</p>}
+            {!carregando && !erro && projetos.length === 0 && <p className="estado">Nenhum projeto publicado ainda.</p>}
+            {!carregando && !erro && projetos.length > 0 && <p className="resumo-dados">{projetos.length} projeto(s) recebido(s).</p>}
+          </div>
+          {erro && <p className="estado erro" role="alert">{erro}</p>}
+          <div className="cards" aria-busy={carregando}>
+            {!carregando && !erro && projetos.map((p) => (
               <CardProjeto
                 key={p.id}
                 nome={p.nome}
@@ -53,6 +97,7 @@ function App() {
             ))}
           </div>
         </section>
+        <Catalogo />
         <Contato />
       </main>
       <Rodape />

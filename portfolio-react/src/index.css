@@ -160,3 +160,23 @@ input:focus-visible, textarea:focus-visible { border-color: var(--destaque); out
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition: none !important; }
 }
+
+/* Aula 27: os estados remotos acompanham o mesmo desenho dos cards. */
+.botao-secundario { color: var(--destaque); background: transparent; }
+.botao-secundario:hover { background: var(--superficie-alta); }
+.botao:disabled { cursor: wait; opacity: .65; }
+.estado { padding: 18px; margin-bottom: 20px; border: 1px solid var(--linha); background: var(--superficie); overflow-wrap: anywhere; }
+.erro { color: #ffb4b4; border-color: #aa5555; }
+.resumo-dados { color: var(--secundario); margin-bottom: 20px; font-size: 14px; }
+.catalogo { padding: 60px 0; border-top: 1px solid var(--linha); }
+.tecnologias { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.tecnologias li { padding: 20px; background: var(--superficie); border: 1px solid var(--linha); border-radius: 4px; overflow-wrap: anywhere; }
+.tecnologias h3 { font-size: 18px; }
+.tecnologias p { color: var(--secundario); font-size: 14px; }
+@media (max-width: 700px) {
+  nav { flex-wrap: wrap; gap: 4px 16px; }
+  .tecnologias { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 420px) {
+  .tecnologias { grid-template-columns: minmax(0, 1fr); }
+}

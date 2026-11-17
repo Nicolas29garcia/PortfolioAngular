@@ -393,7 +393,7 @@ Desenvolvido por **Nicolas Henrique Garcia**.
 
 ## 🤖 Uso de inteligência artificial
 
-A inteligência artificial foi utilizada como apoio para revisar a documentação, compreender conceitos de autenticação, organizar os testes e auxiliar na identificação de possíveis melhorias. A implementação e os testes devem ser conferidos pelo autor.
+IA utilizada para implementar a Aula 27, revisar a documentação e executar verificações. O autor deve estudar e conferir o código e os resultados registrados abaixo.
 
 ## ⚛️ Portfólio em React — Aula 25
 
@@ -421,7 +421,92 @@ portfolio-react/
 
 ### Aula 26: estado, lista e formulario
 
-Os projetos sairam do `App.jsx` e moram em `src/projetos.js`. A tela os desenha com `map`.
+Na Aula 26, os projetos saíram do `App.jsx` para `src/projetos.js`, desenhados com `map` e `key` pelo `id`. Na Aula 27, essa lista fixa foi removida e substituída pela API.
 
 O formulario de contato (`src/Contato.jsx`) guarda o que a pessoa digita no estado, com `useState`.
 Ele ainda nao envia nada: avisa e limpa os campos. O envio de verdade chega com a API.
+
+### Aula 27: efeito e dado remoto
+
+O React busca `GET /api/projetos` no `App.jsx` e `GET /api/tecnologias` no `Catalogo.jsx`. Cada lista começa em `[]` e tem seus próprios estados de carregamento e erro. As funções de busca são chamadas pelo `useEffect` com dependências `[]`, verificam `resposta.ok` antes de `resposta.json()` e encerram a espera no `finally`, tanto no sucesso quanto na falha.
+
+Os cards reutilizáveis continuam recebendo props e sendo renderizados com `map` e `key={p.id}`. O catálogo usa uma lista com `key` pelo `id`. Há botões para atualizar cada lista e mensagens de lista vazia, exibidas somente depois da espera e sem erro. O arquivo `portfolio-react/src/projetos.js` foi removido; uma falha não é substituída por dados fixos.
+
+O formulário da Aula 26 mantém nome, e-mail e mensagem controlados, saudação, contador, aviso e limpeza após a simulação. Nenhuma mensagem é enviada. Rotas React, login e operações de escrita da Aula 28 não foram adicionados.
+
+#### Endereço da API
+
+O endereço fica centralizado em `portfolio-react/src/api.js`, sem barra final. **Pendente de confirmação:** a URL antiga encontrada no Angular respondeu HTTP 404 em 17/11/2026, e a conta conectada não listou Codespaces acessíveis. Por isso, `API` está vazia e a interface informa que o endereço não está configurado. Não foi inventada uma URL nem recriado o banco.
+
+No Codespace deste repositório, inicie a API e abra o painel **PORTS**. Na linha **3000**, escolha **Port Visibility → Public**, copie o **Forwarded Address** e cole esse endereço real em `src/api.js`. A porta 5173 abre o React; não confunda os dois endereços.
+
+#### Iniciar os programas no Codespace existente
+
+Primeiro confira alterações locais; não substitua arquivos pendentes. Não execute novamente `setup.sql` ou scripts de criação de usuário em um banco existente. Os comandos de preparação do zero documentados nas aulas anteriores não são necessários para a Aula 27.
+
+Terminal da API:
+
+```bash
+cd /workspaces/PortfolioAngular
+sudo service mariadb start
+cd api-node
+npm ci
+node server.js
+```
+
+Terminal do React:
+
+```bash
+cd /workspaces/PortfolioAngular/portfolio-react
+npm ci
+npm run dev -- --host 0.0.0.0
+```
+
+Se a API já estiver rodando, reutilize o serviço. Em outro terminal, confira as consultas públicas sem alterar registros:
+
+```bash
+curl -i http://localhost:3000/api/projetos
+curl -i http://localhost:3000/api/tecnologias
+```
+
+Validação do React:
+
+```bash
+cd /workspaces/PortfolioAngular/portfolio-react
+npm run build
+npm run lint
+```
+
+#### Atualizar o Codespace sem perder alterações
+
+Na raiz, inspecione a branch e o conteúdo local antes de atualizar:
+
+```bash
+cd /workspaces/PortfolioAngular
+git status --short --branch
+git diff
+git diff --cached
+git log -3 --oneline
+git fetch origin
+git diff HEAD..origin/main -- README.md portfolio-react
+```
+
+Se estiver em `main` e a árvore estiver limpa, execute `git pull --ff-only origin main`. Se houver alterações pendentes, guarde-as primeiro:
+
+```bash
+git stash push -u -m "Alterações locais antes da Aula 27"
+git stash list
+git pull --ff-only origin main
+git stash apply 'stash@{0}'
+git status --short
+```
+
+Use o stash recém-criado; não aplique um stash antigo se o comando não tiver criado nenhum. `apply` conserva a cópia guardada. Se houver conflitos, resolva preservando as duas versões antes de continuar. Se houver commits locais divergentes ou outra branch ativa, examine o histórico antes de integrar; não use reset destrutivo ou force push. Esta execução trabalhou em clone separado de `main`, a partir de `917dc2b`; o conteúdo pendente do Codespace não estava acessível e não foi sobrescrito.
+
+#### Verificações desta implementação
+
+- `npm ci`, `npm run build` e `npm run lint` executados no ambiente Cloud. A regra `react/set-state-in-effect` possui exceção documentada apenas nas duas chamadas de busca assíncrona do padrão exigido pela aula; as demais verificações permanecem ativas.
+- Navegador Chromium com Playwright: configuração ausente, sucesso, espera controlada, HTTP 404/500 (inclusive corpo HTML), falha de conexão, resposta com formato inválido, lista vazia, recuperação pelo botão, independência das consultas, formulário e navegação.
+- Esses cenários de rede foram **simulados por interceptação de requisições somente no navegador**. Os projetos de teste vieram do histórico deste próprio repositório. Nenhum serviço compartilhado foi interrompido e nenhum registro foi alterado.
+- Sem rolagem horizontal nos testes de 1440, 1024, 768, 390 e 320 px. Conferidos foco visível, atalho para conteúdo, movimento reduzido e ausência de exceções JavaScript nos cenários de interface.
+- **Integração real pendente:** o único teste remoto disponível foi a consulta da URL antiga, que retornou 404. Ainda não foi possível validar projetos/tecnologias do banco atual, CORS ou a visibilidade da porta 3000. Não confundir os testes simulados acima com essa validação.

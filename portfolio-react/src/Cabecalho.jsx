@@ -11,7 +11,8 @@ function Cabecalho() {
       <nav aria-label="Navegação principal">
         <a href="#inicio"><span aria-hidden="true">01</span> Início</a>
         <a href="#projetos"><span aria-hidden="true">02</span> Projetos</a>
-        <a href="#contato"><span aria-hidden="true">03</span> Contato</a>
+        <a href="#catalogo"><span aria-hidden="true">03</span> Catálogo</a>
+        <a href="#contato"><span aria-hidden="true">04</span> Contato</a>
       </nav>
     </header>
   );
