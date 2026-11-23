@@ -1072,3 +1072,61 @@ As prévias simuladas usam os projetos do antigo `projetos.js` deste próprio re
 ## 🤖 Uso de inteligência artificial
 
 IA utilizada na Aula 27 e no redesign, e para corrigir a API da Entrega A, organizar evidências e executar testes com MariaDB isolado. Nicolas deve revisar o código e concluir a configuração do dono no Codespace.
+
+## 🎯 Entrega B — Aula 28: rotas, login e gestão React
+
+O portfólio React usa `react-router-dom`: `/` é a página pública com projetos, catálogo e formulário demonstrativo de contato; `/gestao` é o login e a gestão; qualquer outra rota mostra a página não encontrada. O menu usa `Link`, sem recarregar o documento.
+
+Na gestão, `POST /api/login` confere as credenciais cadastradas no MariaDB. O token JWT retornado fica no `localStorage` sob a chave `token`, é recuperado após F5 e apagado por **Sair**. Cadastro (`POST`), edição (`PUT`) e exclusão (`DELETE`) enviam `Authorization: Bearer <token>`. Uma resposta **401** a uma operação de escrita limpa o token e devolve ao formulário de login com a mensagem da API. A lista se atualiza depois do cadastro/edição e imediatamente depois da exclusão, sem F5. O formulário contém **nome, descrição, tecnologias, ano e link do GitHub**.
+
+### Como rodar do zero (banco → API → React)
+
+1. **Banco:** inicie o MariaDB no Codespace, a partir da raiz do repositório.
+   ```bash
+   sudo service mariadb start
+   # SOMENTE em uma instalação nova, sem dados a preservar:
+   sudo mariadb < portfolio-angular/sql/setup.sql
+   sudo mariadb dwii_db < sql/usuarios.sql
+   ```
+   **Atenção:** `portfolio-angular/sql/setup.sql` contém `DROP DATABASE`; jamais rode sobre o banco atual com projetos e usuários que deseja manter. Em banco existente, confira se a tabela `usuarios` já existe e só aplique a criação necessária.
+
+2. **API:** em outro terminal, na raiz do projeto:
+   ```bash
+   cd api-node
+   npm install
+   # se ainda não existe um dono, crie com e-mail próprio (senha digitada de modo oculto):
+   node criar-usuario.js seu-email@exemplo.com
+   node server.js
+   ```
+   A API deve mostrar `API no ar em http://localhost:3000`. No painel **PORTS** do Codespace, deixe a porta **3000 Public**, conforme a aula. Não coloque senha, hash ou token em arquivo versionado.
+
+3. **React:** em mais um terminal, na raiz do projeto:
+   ```bash
+   cd portfolio-react
+   npm install
+   npm run dev
+   ```
+   Abra a porta **5173** do Codespace. Acesse `/` para o portfólio, `/gestao` para autenticar e testar a gestão, ou `/pagina-inexistente` para verificar o 404. Verifique em `portfolio-react/src/api.js` se o endereço aponta para a sua API na porta 3000 (o endereço muda se o Codespace mudar). Em ambiente local, pode apontar para `http://localhost:3000`.
+
+### Tela × pedido à API × token
+
+| Tela/ação | Pedido à API | Precisa de token? |
+|---|---|---|
+| Início: listar projetos | `GET /api/projetos` | Não |
+| Início: catálogo | `GET /api/tecnologias` | Não |
+| Gestão: entrar | `POST /api/login` | Não (e-mail e senha) |
+| Gestão: listar projetos | `GET /api/projetos` | Não |
+| Gestão: cadastrar | `POST /api/projetos` | Sim, Bearer |
+| Gestão: editar | `PUT /api/projetos/:id` | Sim, Bearer |
+| Gestão: excluir | `DELETE /api/projetos/:id` | Sim, Bearer |
+
+### O que este front ainda não faz
+
+- O formulário de contato do React é apenas uma **simulação**: não envia e-mail nem salva mensagens na API.
+- A interface React consulta o catálogo, mas **não cadastra, edita ou exclui tecnologias**; essas rotas existem na API Node, não nesta tela.
+
+**Segurança:** esconder a rota `/gestao` não protege os dados, porque qualquer pessoa pode pedir diretamente à API. Quem protege as operações de escrita é o servidor Node, que verifica o token JWT no middleware `autenticar`. As consultas GET continuam públicas.
+
+**Histórico exigido:** os commits `Aula 25:`, `Aula 26:` e `Aula 27:` já estavam no repositório; a entrega acrescenta o commit `Aula 28:`.
+
+**Uso de IA na Aula 28:** ChatGPT auxiliou a implementar as rotas, os formulários de gestão e as operações de cadastro/edição/exclusão, além de organizar este README conforme a Entrega B; o código deve ser conferido pelo estudante em seu Codespace.

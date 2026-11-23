@@ -1,18 +1,17 @@
-// Cabecalho: a barra de topo do Portfolio, com o nome e os links.
-// Um componente e uma funcao que devolve JSX. O nome comeca com maiuscula.
+import { Link } from 'react-router-dom';
+
+// A navegacao utiliza Link para trocar de tela sem recarregar a pagina.
 function Cabecalho() {
   return (
     <header className="cabecalho container">
       <a className="skip-link" href="#conteudo">Pular para o conteúdo</a>
-      <a className="identidade" href="#inicio" aria-label="Nicolas Henrique Garcia — início">
+      <Link className="identidade" to="/" aria-label="Nicolas Henrique Garcia — início">
         <span className="monograma" aria-hidden="true">NG<span /></span>
         <span className="identidade-nome">Nicolas Henrique Garcia</span>
-      </a>
+      </Link>
       <nav aria-label="Navegação principal">
-        <a href="#inicio"><span aria-hidden="true">01</span> Início</a>
-        <a href="#projetos"><span aria-hidden="true">02</span> Projetos</a>
-        <a href="#catalogo"><span aria-hidden="true">03</span> Catálogo</a>
-        <a href="#contato"><span aria-hidden="true">04</span> Contato</a>
+        <Link to="/"><span aria-hidden="true">01</span> Início</Link>
+        <Link to="/gestao"><span aria-hidden="true">02</span> Gestão</Link>
       </nav>
     </header>
   );
