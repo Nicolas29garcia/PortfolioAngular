@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import API from './api.js';
 
+// Calculado fora da renderização para manter o componente puro.
+const ANO_ATUAL = new Date().getFullYear();
+
 // Cadastro e edicao usam o mesmo contrato de cinco campos da API Node.
 function NovoProjeto({ token, projetoEmEdicao, cancelarEdicao, onSalvo, onSessaoExpirada }) {
   const [nome, setNome] = useState(projetoEmEdicao?.nome ?? '');
   const [descricao, setDescricao] = useState(projetoEmEdicao?.descricao ?? '');
   const [tecnologias, setTecnologias] = useState(projetoEmEdicao?.tecnologias ?? '');
-  const [ano, setAno] = useState(String(projetoEmEdicao?.ano ?? new Date().getFullYear()));
+  const [ano, setAno] = useState(String(projetoEmEdicao?.ano ?? ANO_ATUAL));
   const [linkGithub, setLinkGithub] = useState(projetoEmEdicao?.link_github ?? '');
   const [erro, setErro] = useState('');
   const [salvando, setSalvando] = useState(false);
